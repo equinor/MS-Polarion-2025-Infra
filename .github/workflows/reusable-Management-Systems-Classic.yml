@@ -39,8 +39,8 @@ env:
   SubscriptionPrefix: "S499"
   ModulesPath: "./template-bundles/omnia-classic/"
   location: "norwayeast"
-  resourceGroupName: "MS-POLARION"
-  KeyVaultName: "MS-POLARION-KV"
+  resourceGroupName: "MS-POLARION-2025"
+  KeyVaultName: "MS-POLARION-2025-KV"
 
 jobs:
   deploy-polarion:
