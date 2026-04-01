@@ -1,0 +1,682 @@
+name: ♻ Management Systems Classic
+
+on:
+  workflow_call:
+    inputs:
+      environmentName:
+        description: The name of the GitHub environment that this job references.
+        type: string
+        required: false
+      resourceGroupName:
+        description: The name of the resource group.
+        type: string
+        required: true
+      location:
+        description: The location to create the resources in.
+        type: string
+        required: true
+      environmentType:
+        description: The type of environment, NONPROD or PROD.
+        type: string
+        required: true
+
+run-name: ${{ github.actor }} started deployment of MS Docmap - S499
+
+permissions:
+  contents: read # Required to checkout the repository
+  id-token: write # Required to login to Azure using OIDC
+
+defaults:
+  run:
+    shell: pwsh
+
+env:
+  TenantID: ${{ secrets.AZURE_TENANT_ID }}
+  AppId: ${{ secrets.S499_AZURE_CLIENT_ID }}
+  Subscription: ${{ secrets.S499_AZURE_SUBSCRIPTION_ID }}
+  AppSecret: ${{ secrets.S499_AZURE_CLIENT_SECRET }}
+  FKEYPW: ${{ secrets.S499_AZURE_FKEYPW }}
+  SubscriptionPrefix: "S499"
+  ModulesPath: "./template-bundles/omnia-classic/"
+  location: "norwayeast"
+  resourceGroupName: "MS-POLARION"
+  KeyVaultName: "MS-POLARION-KV"
+
+jobs:
+  deploy-polarion:
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environmentName }}
+    env:
+      ModuleName: Management-Systems-Classic
+      environmentName: ${{ inputs.environmentName }}
+      resourceGroupName: ${{ inputs.resourceGroupName }}
+      ACTIONS_STEP_DEBUG: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Azure module to resolve Token issue
+        uses: ./.github/actions/az-install
+        with:
+          version: 11.6.0 # This version of PS remediates the OIDC token expiry issue - #10249
+
+      - name: Connect to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+
+      - name: Prerequisites
+        uses: azure/powershell@v3
+        with:
+          azPSVersion: "latest"
+          inlineScript: |
+            Get-AzTenant
+
+            Write-Output "Enabling AZ logging..."
+            az configure --defaults logging.enable_log_file=yes
+
+            Write-Output "Installing modules..."
+
+            Install-Module -Name Microsoft.PowerShell.SecretManagement -Repository PSGallery -Force
+            Install-Module Az.KeyVault -Repository PSGallery -Force
+            Install-Module Az.Accounts -force -MaximumVersion "3.0.5"
+            Install-Module Az.Resources -force -MaximumVersion "7.6.0"
+            Install-Module Az.Network -force -MaximumVersion "7.10.0"
+            Install-Module Az.Compute -force -MaximumVersion "8.5.0"
+            Install-Module -Name AzureAD -Force -AllowClobber
+            Import-Module Microsoft.PowerShell.SecretManagement
+            Import-Module Az.KeyVault
+
+            if ("${{env.environmentName}}" -like "DEV") { $kv = "KV2" } else { $kv = "KV" }
+            $VaultParameters = @{
+              AZKVaultName   = "${{env.resourceGroupName}}-$kv-${{ env.environmentName }}"
+              SubscriptionId = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            }
+            Register-SecretVault -Module Az.KeyVault -Name AzKV -VaultParameters $VaultParameters
+
+            Write-Output "Installing AzCopy"
+            wget -O azcopy.tar.gz https://aka.ms/downloadazcopy-v10-linux
+            tar -xf azcopy.tar.gz --strip-components=1
+            sudo mv ./azcopy /usr/local/bin/
+            azcopy --version
+
+      # - name: Deploying Azure resources BaseLine - ResourceGroup and Keyvault
+      #   shell: pwsh
+      #   run: |
+      #     # Check for external IP address
+      #     $runner = (Invoke-RestMethod -Uri https://ipinfo.io/json).ip
+      #     Write-Output "Runner: $runner"
+
+      #     New-AzSubscriptionDeployment -Name "Deploy-${{ inputs.environmentName }}-${{ github.actor }}" `
+      #       -TemplateFile '${{ env.ModulesPath }}/${{ env.ModuleName }}/base.open.deploy.bicep' `
+      #       -resourceGroupName "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" `
+      #       -TemplateParameterFile '${{ env.ModulesPath }}/${{ env.ModuleName }}/${{ inputs.environmentName }}/1.base.open.parameters.polarion.${{ inputs.environmentName }}.json' `
+      #       -tenantId '${{ secrets.AZURE_TENANT_ID }}' `
+      #       -subscriptionId '${{ secrets.AZURE_SUBSCRIPTION_ID }}' `
+      #       -subscriptionPrefix '${{ env.SubscriptionPrefix }}' `
+      #       -AZAPPL_S499_OWNER '${{ secrets.AZAPPL_S499_OWNER }}' `
+      #       -S499_MS_Classic_Omnia_Contributor '${{ secrets.S499_MS_Classic_Omnia_Contributor }}' `
+      #       -S499_MS_CLASSIC_OMNIA_OWNER "${{ secrets.S499_MS_CLASSIC_OMNIA_OWNER }}" `
+      #       -Deploy_iac_objectID "${{ secrets.AZAPPL_S499_OWNER }}" `
+      #       -location "${{ env.location }}" `
+      #       -IAC_OBJECT_ID '${{ secrets.AZURE_SPN_ID }}' `
+      #       -runner $runner
+
+      # - name: Generate and set passwords to Keyvault with powershell
+      #   run: |
+      #     Import-Module Microsoft.PowerShell.SecretManagement
+      #     Import-Module Az.KeyVault
+      #     Add-Type -AssemblyName System.Web
+
+      #     $NorwayBaseTime = (Get-Date).ToUniversalTime().AddHours(1)
+      #     $expiry = $NorwayBaseTime.AddDays(180)
+
+      #     $vm_names = "PLWS01-${{ env.environmentName }}", "PLWS02-${{ env.environmentName }}", "PLWS03-${{ env.environmentName }}", "PLWS04-${{ env.environmentName }}"
+      #     if ("${{env.environmentName}}" -like "DEV") { $kv = "KV2"}else{$kv = "KV"}
+      #     foreach ($vm_name in $vm_names) {
+      #       $secret = Get-AzKeyVaultSecret -VaultName "${{env.resourceGroupName}}-$kv-${{ env.environmentName }}" -Name "${vm_name}"
+      #       # Check if the secret is expired or null/blank
+      #       if ($secret.Expires -lt $NorwayBaseTime -or $secret.SecretValue -eq $null -or $secret.SecretValue -eq "") {
+      #         # Generate a new random password for the VM
+      #         $vm_password = ConvertTo-SecureString -String (openssl rand -base64 32) -AsPlainText -Force
+
+      #         # Set the new password in the Azure Key Vault with the calculated expiry date
+      #         # This will create a new version of the secret
+      #         # Set the contentType to "VM"
+      #         Set-AzKeyVaultSecret -VaultName "${{env.resourceGroupName}}-$kv-${{ env.environmentName }}" -Name "${vm_name}" -SecretValue $vm_password -Expires $expiry -ContentType "VM" -NotBefore (Get-Date)
+      #       }
+      #     }
+
+      # - name: Deploying Azure resources
+      #   shell: pwsh
+      #   run: |
+      #     Write-Output "Now deploying MS POLARION ${{ env.environmentName }}"
+      #     Write-Output "location: ${{ env.location }}"
+
+      #     $passwords = @()
+      #     $vmList = "${{ env.SubscriptionPrefix }}PLWS01-${{ env.environmentName }}", "${{ env.SubscriptionPrefix }}PLWS02-${{ env.environmentName }}", "${{ env.SubscriptionPrefix }}PLWS03-${{ env.environmentName }}", "${{ env.SubscriptionPrefix }}PLWS04-${{ env.environmentName }}"
+      #     foreach ($vm in $vmList) {
+      #       $password = openssl rand -base64 100 | tr -dc 'A-Za-z0-9!@#$%^&*()' | head -c 14
+      #       Write-Host "Generated adminPasswordsarray for $vm"
+      #       $passwords += [PSCustomObject]@{
+      #         Name     = $vm
+      #         Password = $password
+      #       }
+      #     }
+
+      #     $adminPasswordsarray = $passwords | ForEach-Object { $_.Password }
+
+      #     New-AzSubscriptionDeployment -Name "Deployment-${{ env.environmentName }}-${{ github.actor }}-$(get-random)" `
+      #       -TemplateFile "${{ env.ModulesPath }}/${{ env.ModuleName }}/deploy.bicep" `
+      #       -resourceGroupName "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" `
+      #       -subscriptionId "${{ secrets.S499_AZURE_SUBSCRIPTION_ID }}" `
+      #       -TemplateParameterFile "${{ env.ModulesPath }}/${{ env.ModuleName }}/${{ env.environmentName }}/2.deploy.parameters.polarion.${{ env.environmentName }}.json" `
+      #       -location "${{ env.location }}" `
+      #       -UserAssignedIdentitiesClient_ID "${{ secrets.USERASSIGNEDIDENTITIES_CLIENTID }}" `
+      #       -tenantId "${{ secrets.AZURE_TENANT_ID }}" `
+      #       -subscriptionPrefix '${{ env.SubscriptionPrefix }}' `
+      #       -AZAPPL_S499_OWNER "${{ secrets.AZAPPL_S499_OWNER }}" `
+      #       -S499_MS_Classic_Omnia_Contributor "${{ secrets.S499_MS_Classic_Omnia_Contributor }}" `
+      #       -iac_clientid "${{ secrets.S499_AZURE_CLIENT_ID }}" `
+      #       -adminPasswordsarray $adminPasswordsarray `
+
+      # - name: Get VM info and private IP addresses with type of allocation method
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: "latest"
+      #     inlineScript: |
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}"
+      #       $vms = Get-AzVM -ResourceGroupName $resourceGroupName
+      #       $nics = Get-AzNetworkInterface -ResourceGroupName $resourceGroupName | Where-Object VirtualMachine -NE $null
+      #       $vmInfo = $vms | ForEach-Object {
+      #         $vm = $_
+      #         $nic = $nics | Where-Object { $_.VirtualMachine.Id -eq $vm.Id }
+      #         [PSCustomObject]@{
+      #           Name               = $vm.Name
+      #           PrivateIpAddress   = $nic.IpConfigurations[0].PrivateIpAddress
+      #           IpAllocationMethod = $ipAllocationMethod
+      #         }
+      #       }
+      #       $privateIpAddresses = $vmInfo | ForEach-Object { $_.PrivateIpAddress }
+      #       Write-Output "privateIpAddresses: $privateIpAddresses"
+
+      #       foreach ($info in $vmInfo) {
+      #         if ($info.IpAllocationMethod -eq "Static") {
+      #           Write-Output "The IP address for $($info.Name)-$($info.IpAllocationMethod) is static."
+      #         }
+      #         else {
+      #           Write-Output "The IP address for $($info.Name)-$($info.IpAllocationMethod) is not static."
+      #         }
+      #       }
+
+      # - name: Set IP allocation method to Static and print private IP addresses
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: "latest"
+      #     inlineScript: |
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}"
+      #       $vms = Get-AzVM -ResourceGroupName $resourceGroupName
+      #       $nics = Get-AzNetworkInterface -ResourceGroupName $resourceGroupName | Where-Object { $_.VirtualMachine -ne $null }
+      #       $vmInfo = $vms | ForEach-Object {
+      #         $vm = $_
+      #         $nic = $nics | Where-Object { $_.VirtualMachine.Id -eq $vm.Id }
+      #         # Set the IP allocation method to static
+      #         $nic.IpConfigurations[0].PrivateIpAllocationMethod = "Static"
+      #         # Apply the changes to the NIC
+      #         $nic | Set-AzNetworkInterface
+      #         [PSCustomObject]@{
+      #           Name               = $vm.Name
+      #           PrivateIpAddress   = $nic.IpConfigurations[0].PrivateIpAddress
+      #           IpAllocationMethod = $nic.IpConfigurations[0].PrivateIpAllocationMethod
+      #         }
+      #       }
+      #       # Print the output
+      #       $vmInfo | Format-Table -AutoSize
+
+      # - name: Run PowerShell script set laps
+      #   if: false
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: "latest"
+      #     inlineScript: |
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $lapsUrl = "https://ans.equinor.com/Laps" # Replace with your LAPS service URL
+      #       $keyVaultName = "${{env.resourceGroupName}}-KV-${{ env.environmentName }}" # Replace with your Key Vault name
+
+      #       # Get the list of VMs in the resource group
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       if ($vmList -ne $null -and $vmList.Count -gt 0) {
+      #         foreach ($vm in $vmList) {
+      #           # If the VM exists, reset its password
+      #           $response = Invoke-RestMethod -Uri "$lapsUrl/api/password/$vm" -Method Post
+      #           Write-Host "Reset password for $vm. Response: $response"
+
+      #           # Convert the password to a secure string
+      #           $securePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
+
+      #           # Upload the password to Azure Key Vault
+      #           Set-AzKeyVaultSecret -VaultName $keyVaultName -Name "$vm-password" -SecretValue $securePassword
+      #         }
+      #       }
+      #       else {
+      #         Write-Host "No VMs found in resource group $resourceGroupName"
+      #       }
+
+      # # - name: Configure Windows Server on Azure VM
+      # #   if: false
+      # #   uses: azure/powershell@v2
+      # #   with:
+      # #     azPSVersion: "latest"
+      # #     inlineScript: |
+      # #       pushd ./custom-script
+      # #       (get-ChildItem -filter *.ps1).name | Foreach-Object {
+      # #         $psType = @()
+      # #         if ($_ -like "*51*") {
+      # #           Write-Output "Runtime Version 5.1"
+      # #           $pstype = "PowerShell"
+      # #         }
+      # #       }
+
+      # #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      # #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      # #       # Loop over each VM and run the script
+      # #       foreach ($VM in $vmList) {
+      # #         Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -Name $VM -ScriptPath ./Add-WindowsServerDefaults.ps1 -CommandId RunPowerShellScript
+      # #       }
+
+      # - name: Run PowerShell scripts to Install DotNet6-x64 on Azure VMs
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: latest
+      #     inlineScript: |
+      #       pushd ./custom-script
+      #       (get-ChildItem -filter *.ps1).name | Foreach-Object {
+      #         $psType = @()
+      #         if ($_ -like "*51*") {
+      #           Write-Output "Runtime Version 5.1"
+      #           $pstype = "PowerShell"
+      #         }
+      #       }
+      #       # Define the resource group name
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       foreach ($VM in $vmList) {
+      #         # Define the script that creates the scheduled taskD
+      #         $ScriptBlock = {
+      #           # Check if the ScheduledTasks module is available
+      #           if (!(Get-Module -ListAvailable -Name ScheduledTasks)) {
+      #             Write-Output "The ScheduledTasks module is not available on this system."
+      #             return
+      #           }
+
+      #           # Define the base URI for .NET downloads
+      #           $DotNetBaseUri = "https://dotnet.microsoft.com/download/dotnet/6.0"
+
+      #           # Use Invoke-WebRequest to get the .NET download page content
+      #           $DotNetPage = Invoke-WebRequest -Uri $DotNetBaseUri -UseBasicParsing
+
+      #           # Use a regular expression to find the latest .NET 6 version number
+      #           $DotNet6Version = ($DotNetPage.Content | Select-String -Pattern 'dotnet-sdk-([0-9\.]+)-win-x64.exe' -AllMatches).Matches | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique | Select-Object -Last 1
+
+      #           # Define the download URI based on the version
+      #           $DotNet6Uri = "https://download.microsoft.com/download/6/$DotNet6Version/dotnet-sdk-$DotNet6Version-win-x64.exe"
+
+      #           # Download the file and overwrite if it already exists
+      #           Invoke-WebRequest -Uri $DotNet6Uri -OutFile "C:\Appl\dotnet6-win-x64.exe" -UseBasicParsing
+
+      #           # Install .NET with silent and no restart options
+      #           Start-Process -FilePath "C:\Appl\dotnet6-win-x64.exe" -ArgumentList "/quiet", "/norestart" -NoNewWindow -Wait
+
+      #           # Create the scheduled task to run the script daily
+      #           $Action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-ExecutionPolicy Bypass -File "C:\Appl\dotnet6-win-x64.ps1"'
+      #           $Trigger = New-ScheduledTaskTrigger -Daily -At 6pm
+      #           $Settings = New-ScheduledTaskSettingsSet
+      #           $Principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount
+      #           Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName "UpdateDotNetSDK" -Description "Daily task to check for .NET updates" -Settings $Settings -Principal $Principal
+      #         }
+
+      #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -ScriptString $scriptBlock -CommandId RunPowerShellScript
+      #       }
+
+      # - name: Install VCRedist-x64 on Azure VMs
+      #   if: false
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: latest
+      #     inlineScript: |
+      #       pushd ./custom-script
+      #       (get-ChildItem -filter *.ps1).name | Foreach-Object {
+      #         $psType = @()
+      #         if ($_ -like "*51*") {
+      #           Write-Output "Runtime Version 5.1"
+      #           $pstype = "PowerShell"
+      #         }
+      #       }
+      #       # Define the resource group name
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       foreach ($VM in $vmList) {
+      #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -ScriptPath ./02-Install-VCRedist-x64.ps1 -CommandId RunPowerShellScript
+      #       }
+
+      # - name: Install OpenSSL-3.1.4-x64 on Azure VMs
+      #   if: false
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: latest
+      #     inlineScript: |
+      #       pushd ./custom-script
+      #       (get-ChildItem -filter *.ps1).name | Foreach-Object {
+      #         $psType = @()
+      #         if ($_ -like "*51*") {
+      #           Write-Output "Runtime Version 5.1"
+      #           $pstype = "PowerShell"
+      #         }
+      #       }
+      #       # Define the resource group name
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       foreach ($VM in $vmList) {
+      #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -ScriptPath ./03-Install-OpenSSL-3.1.4-x64.ps1 -CommandId RunPowerShellScript
+      #       }
+
+      # - name: Install OJDK11&17-x64 on Azure VMs
+      #   if: false
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: latest
+      #     inlineScript: |
+      #       pushd ./custom-script
+      #       (get-ChildItem -filter *.ps1).name | Foreach-Object {
+      #         $psType = @()
+      #         if ($_ -like "*51*") {
+      #           Write-Output "Runtime Version 5.1"
+      #           $pstype = "PowerShell"
+      #         }
+      #       }
+      #       # Define the resource group name
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       foreach ($VM in $vmList) {
+      #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -ScriptPath ./04-Install-OJDK11-17.ps1 -CommandId RunPowerShellScript
+      #       }
+
+      # - name: Install VsCode-x64 on Azure VMs
+      #   if: false
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: latest
+      #     inlineScript: |
+      #       pushd ./custom-script
+      #       (get-ChildItem -filter *.ps1).name | Foreach-Object {
+      #         $psType = @()
+      #         if ($_ -like "*51*") {
+      #           Write-Output "Runtime Version 5.1"
+      #           $pstype = "PowerShell"
+      #         }
+      #       }
+      #       # Define the resource group name
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       foreach ($VM in $vmList) {
+      #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -ScriptPath ./05-Install-VsCode-x64.ps1 -CommandId RunPowerShellScript
+      #       }
+
+      # - name: Install AzureStorageExplorer on Azure VMs
+      #   if: false
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: latest
+      #     inlineScript: |
+      #       pushd ./custom-script
+      #       (get-ChildItem -filter *.ps1).name | Foreach-Object {
+      #         $psType = @()
+      #         if ($_ -like "*51*") {
+      #           Write-Output "Runtime Version 5.1"
+      #           $pstype = "PowerShell"
+      #         }
+      #       }
+      #       # Define the resource group name
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       foreach ($VM in $vmList) {
+      #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -ScriptPath ./06-Install-AzureStorageExplorer.ps1 -CommandId RunPowerShellScript
+      #       }
+
+      # - name: Install AzCopy on Azure VMs
+      #   if: false
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: latest
+      #     inlineScript: |
+      #       pushd ./custom-script
+      #       (get-ChildItem -filter *.ps1).name | Foreach-Object {
+      #         $psType = @()
+      #         if ($_ -like "*51*") {
+      #           Write-Output "Runtime Version 5.1"
+      #           $pstype = "PowerShell"
+      #         }
+      #       }
+      #       # Define the resource group name
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       foreach ($VM in $vmList) {
+      #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -ScriptPath ./07-Install-AzCopy.ps1 -CommandId RunPowerShellScript
+      #       }
+
+      # # - name: Create Admin_SecurityGroups for vms
+      # #   uses: azure/powershell@v2
+      # #   with:
+      # #     azPSVersion: latest
+      # #     inlineScript: |
+      # #       # Define headers for the REST method
+      # #       $headers = @{
+      # #         "Accept" = "application/json"
+      # #       }
+
+      # #       # Define members for the JSON data
+      # #       $members = @("a_torme", "a_otras", "a_mhaag", "80aaa1c7-b625-4ca7-a48e-fcbdfa5e95f6")
+
+      # #       # Get the resource group name
+      # #       $resourceGroupName = "${env:SubscriptionPrefix}-${env:resourceGroupName}-${env:environmentName}" # Replace with your resource group name
+
+      # #       # Get the list of VMs in the resource group
+      # #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      # #       # Check if there are any VMs in the list
+      # #       if ($vmList.Count -eq 0) {
+      # #         Write-Output "No VMs found in resource group $resourceGroupName"
+      # #         exit 1
+      # #       }
+
+      # #       # Loop through each VM in the list
+      # #       foreach ($vmName in $vmList) {
+      # #         # Create JSON data for each server
+      # #         $jsonData = @{
+      # #           "serverName" = $vmName
+      # #           "members"    = $members
+      # #         } | ConvertTo-Json
+
+      # #         $scriptBlock = @"
+      # #           try {
+      # #             # Invoke the REST method for each server
+      # #             Invoke-RestMethod -Uri "https://ocn-adgroup.equinor.com/api/ServerAdGroup" -Method Post -Body $jsonData -ContentType "application/json" -Headers $headers
+      # #           }
+      # #           catch {
+      # #             Write-Error "Failed to invoke REST method for server $vmName"
+      # #             exit 1
+      # #           }
+      # #       "@
+      # #           # Run the script on the VM
+      # #           Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -VMName $vmName -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+      # #       }
+
+      # # - name: Run PowerShell scripts Add Admin_SecurityGroups for vms
+      # #   uses: azure/powershell@v2
+      # #   with:
+      # #     azPSVersion: latest
+      # #     inlineScript: |
+      # #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      # #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      # #       foreach ($VM in $vmList) {
+      # #         $securityGroupName = "Admin_$VM"
+      # #         $domainSecurityGroup = "statoil.net\$securityGroupName"
+
+      # #         # Define the script block to add the security group to the local administrators group
+      # #         $scriptBlock = @"
+      # #           # Install the Active Directory module
+      # #           Install-WindowsFeature RSAT-AD-PowerShell
+
+      # #           # Import the Active Directory module
+      # #           Import-Module ActiveDirectory
+
+      # #           # Add the security group to the local administrators group
+      # #           Add-LocalGroupMember -Group 'Administrators' -Member '$domainSecurityGroup'
+      # #       "@
+
+      # #         # Run the script on the VM
+      # #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+      # #       }
+
+      # # - name: Run PowerShell scripts Add AccessIT Admin_SecurityGroups for vms
+      # #   uses: azure/powershell@v2
+      # #   with:
+      # #     azPSVersion: latest
+      # #     inlineScript: |
+      # #       # Define the resource group name
+      # #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      # #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      # #       foreach ($VM in $vmList) {
+      # #         $securityGroupName = "S499-MSC-Polarion-VMLogin_admins"
+      # #         $domainSecurityGroup = "statoil.net\$securityGroupName"
+
+      # #         # Define the script block to add the security group to the local administrators group
+      # #         $scriptBlock = @"
+      # #           # Install the Active Directory module
+      # #           Install-WindowsFeature RSAT-AD-PowerShell
+
+      # #           # Import the Active Directory module
+      # #           Import-Module ActiveDirectory
+
+      # #           # Add the security group to the local administrators group
+      # #           Add-LocalGroupMember -Group 'Administrators' -Member '$domainSecurityGroup'
+      # #       "@
+
+      # #         # Run the script on the VM
+      # #         Invoke-AzVMRunCommand -ResourceGroupName  $resourceGroupName -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+      # #       }
+
+      # # - name: Run PowerShell scripts create shared network folder c:\appl\shared and Add Admin_SecurityGroups for vms
+      # #   if: false
+      # #   uses: azure/powershell@v2
+      # #   with:
+      # #     azPSVersion: latest
+      # #     inlineScript: |
+      # #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}"
+      # #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      # #       foreach ($VM in $vmList) {
+      # #         $scriptBlock = @"
+      # #           # Create the directory
+      # #           try {
+      # #             New-Item -ItemType Directory -Force -Path "C:\appl\shared"
+      # #           } catch {
+      # #             Write-Error "Failed to create directory: $_"
+      # #             exit 1
+      # #           }
+
+      # #           # Define the ACL
+      # #           $Acl = Get-Acl "C:\appl\shared"
+
+      # #           # Create a new rule
+      # #           $Ar = New-Object  system.security.accesscontrol.filesystemaccessrule("statoil.net\S499-MSC-Polarion-VMLogin_admins","FullControl","Allow")
+
+      # #           # Apply the rule to the ACL
+      # #           $Acl.SetAccessRule($Ar)
+
+      # #           # Apply the ACL to the folder
+      # #           try {
+      # #             Set-Acl "C:\appl\shared" $Acl
+      # #           } catch {
+      # #             Write-Error "Failed to set ACL: $_"
+      # #             exit 1
+      # #           }
+
+      # #           # Share the folder
+      # #           try {
+      # #             New-SmbShare -Name "SharedFolder" -Path "C:\appl\shared" -FullAccess "statoil.net\S499-MSC-Polarion-VMLogin_admins"
+      # #           } catch {
+      # #             Write-Error "Failed to share folder: $_"
+      # #             exit 1
+      # #           }
+      # #       "@
+
+      # #         # Run the script on the VM
+      # #         try {
+      # #           Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+      # #         }
+      # #         catch {
+      # #           Write-Error "Failed to run command on VM: $_"
+      # #         }
+      # #       }
+
+      # # - name: Run PowerShell scripts to Copy Content from Blob${{ env.environmentName }} on Azure VMs
+      # #   if: false
+      # #   uses: azure/powershell@v2
+      # #   with:
+      # #     azPSVersion: latest
+      # #     inlineScript: |
+      # #       pushd ./custom-script
+      # #       (get-ChildItem -filter *.ps1).name | Foreach-Object {
+      # #         $psType = @()
+      # #         if ($_ -like "*51*") {
+      # #           Write-Output "Runtime Version 5.1"
+      # #           $pstype = "PowerShell"
+      # #         }
+      # #       }
+      # #       $vmNames = @("s499plws01-${{ env.environmentName }}", "s499plws02-${{ env.environmentName }}", "s499plws03-${{ env.environmentName }}", "s499plws04-${{ env.environmentName }}")
+      # #       foreach ($vmName in $vmNames) {
+      # #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $vmName -ScriptPath ./CopyContentfromBlob${{ env.environmentName }}.ps1 -CommandId RunPowerShellScript
+      # #       }
+
+      # # - name: Close base Azure resources BaseLine - ResourceGroup and Keyvault
+      # #   shell: pwsh
+      # #   run: |
+      # #     # Check for external IP address
+      # #     $runner = (Invoke-RestMethod -Uri https://ipinfo.io/json).ip
+      # #     Write-Output "Runner: $runner"
+      # #     $S499_MS_CLASSIC_OMNIA_OWNER = "${{ secrets.S499_MS_CLASSIC_OMNIA_OWNER }}"
+      # #     $location = "${{ env.location }}"
+      # #     $Deploy_iac_objectID = "${{ secrets.AZAPPL_S499_OWNER }}"
+
+      # #     Write-Output "Now deploying POLARION ${{ env.environmentName }}"
+      # #     Write-Output "location: ${{ env.location }}"
+
+      # #     New-AzSubscriptionDeployment -Name "Deploy-${{ env.environmentName }}-${{ github.actor }}" `
+      # #       -TemplateFile '${{ env.ModulesPath }}/${{ env.ModuleName }}/close.base.deploy.bicep' `
+      # #       -resourceGroupName '${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}' `
+      # #       -TemplateParameterFile '${{ env.ModulesPath }}/${{ env.ModuleName }}/${{ env.environmentName }}/3.base.close.parameters.polarion.${{env.environmentName}}.json' `
+      # #       -tenantId '${{ secrets.AZURE_TENANT_ID }}' `
+      # #       -subscriptionId '${{ secrets.AZURE_SUBSCRIPTION_ID }}' `
+      # #       -AZAPPL_S499_OWNER '${{ secrets.AZAPPL_S499_OWNER }}' `
+      # #       -S499_MS_Classic_Omnia_Contributor '${{ secrets.S499_MS_Classic_Omnia_Contributor }}' `
+      # #       -S499_MS_CLASSIC_OMNIA_OWNER $S499_MS_CLASSIC_OMNIA_OWNER `
+      # #       -Deploy_iac_objectID $Deploy_iac_objectID `
+      # #       -location $location `
+      # #       -IAC_OBJECT_ID '${{ secrets.AZURE_SPN_ID }}' `
+      # #       -runner $runner

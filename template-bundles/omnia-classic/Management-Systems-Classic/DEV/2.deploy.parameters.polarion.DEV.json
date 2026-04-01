@@ -1,0 +1,227 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentType": {
+      "value": "DEV"
+    },
+    "environmentTypeLowerCase": {
+      "value": "dev"
+    },
+    "UserAssignedManagedIdentity": {
+      "value": "Polarion-ManagedIdentity"
+    },
+    "kvName": {
+      "value": "MS-POLARION-KV2"
+    },
+    "enableKvPurgeProtection": {
+      "value": true
+    },
+    "deployRecoveryServicesVault": {
+      "value": true
+    },
+    "defaultSystemAssignedIdentity": {
+      "value": true
+    },
+    "defaultOsType": {
+      "value": "Windows"
+    },
+    "vmTags": {
+      "value": {
+        "MachineConfiguration": "Security_Baseline_WS2019",
+        "Omnia-OS-Type": "noDSC",
+        "OmniaCentralUpdateManager": "False"
+      }
+    },
+    "vms": {
+      "value": [
+        {
+          "name": "PLWS01",
+          "osType": "Windows",
+          "AADLogin": false,
+          "domainJoin": true,
+          "vmsize": "Standard_D4s_v5",
+          "defaultOsDisk": {
+            "name": "s499plws01dev-osdisk-20250506-131149",
+            "diskSizeGB": 4096,
+            "createOption": "fromImage",
+            "deleteOption": "Delete",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            }
+          },
+          "imageReferenceObject": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2019-Datacenter",
+            "version": "latest"
+          }
+        },
+        {
+          "name": "PLWS02",
+          "osType": "Windows",
+          "AADLogin": false,
+          "domainJoin": true,
+          "vmsize": "Standard_D4s_v5",
+          "imageReferenceObject": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2019-Datacenter",
+            "version": "latest"
+          }
+        },
+        {
+          "name": "PLWS03",
+          "osType": "Windows",
+          "AADLogin": false,
+          "domainJoin": true,
+          "vmsize": "Standard_D4s_v5",
+          "defaultOsDisk": {
+            "diskSizeGB": 1024,
+            "createOption": "fromImage",
+            "deleteOption": "Delete",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            }
+          },
+          "imageReferenceObject": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2019-Datacenter",
+            "version": "latest"
+          }
+        },
+        {
+          "name": "PLWS04",
+          "osType": "Windows",
+          "AADLogin": false,
+          "domainJoin": true,
+          "vmsize": "Standard_D4s_v5",
+          "defaultOsDisk": {
+            "diskSizeGB": 1024,
+            "createOption": "fromImage",
+            "deleteOption": "Delete",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            }
+          },
+          "imageReferenceObject": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2019-Datacenter",
+            "version": "latest"
+          }
+        }
+      ]
+    },
+    "defaultAdminUsername": {
+      "value": "localAdmin"
+    },
+    "windowsImageReference": {
+      "value": {
+        "publisher": "MicrosoftWindowsServer",
+        "offer": "WindowsServer",
+        "sku": "2019-Datacenter",
+        "version": "latest"
+      }
+    },
+    "tags": {
+      "value": {
+        "Solution": "MS-Polarion",
+        "ContactPerson": "Tore Melberg, Michael Rainer Haag",
+        "Email": "torme@equinor.com, mhaag@equinor.com",
+        "CostAllocationCode": "107505",
+        "CostAllocationType": "AppId",
+        "Team": "Management Systems",
+        "Repository": "https://github.com/equinor/Polarion-infra"
+      }
+    },
+    "defaultVmSize": {
+      "value": "Standard_D8s_v5"
+    },
+    "defaultOsDisk": {
+      "value": {
+        "createOption": "fromImage",
+        "deleteOption": "Delete",
+        "diskSizeGB": "512",
+        "managedDisk": {
+          "storageAccountType": "Premium_LRS"
+        }
+      }
+    },
+    "storageAccounts": {
+      "value": [
+        {
+          "name": "polarion",
+          "storageAccountSku": "Standard_LRS",
+          "storageAccountKind": "StorageV2",
+          "requireInfrastructureEncryption": true,
+          "properties": {
+            "allowedCopyScope": "AAD",
+            "dnsEndpointType": "Standard",
+            "defaultToOAuthAuthentication": false,
+            "publicNetworkAccess": "Enabled",
+            "allowCrossTenantReplication": false,
+            "minimumTlsVersion": "TLS1_2",
+            "allowBlobPublicAccess": false,
+            "allowSharedKeyAccess": true,
+            "supportsHttpsTrafficOnly": true,
+            "fileServices": {
+              "keyType": "Account",
+              "enabled": true,
+              "storageAccountName": "polarion",
+              "protocolSettings": {
+                "smb": {
+                  "authenticationMethods": "NTLMv2;Kerberos",
+                  "channelEncryption": "AES-128-CCM;AES-128-GCM;AES-256-GCM",
+                  "kerberosTicketEncryption": "RC4-HMAC;AES-256",
+                  "multichannel": {
+                    "enabled": false
+                  },
+                  "versions": "SMB3.0;SMB3.1.1"
+                }
+              },
+              "shareDeleteRetentionPolicy": {
+                "allowPermanentDelete": false,
+                "days": 7,
+                "enabled": true
+              }
+            },
+            "blobServices": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          }
+        }
+      ]
+    },
+    "shares": {
+      "value": [
+        {
+          "name": "polarionsmb",
+          "storageAccountName": "polarion",
+          "properties": {
+            "accessTier": "TransactionOptimized",
+            "shareQuota": 5120,
+            "rootSquash": "NoRootSquash",
+            "enabledProtocols": "SMB"
+          }
+        }
+      ]
+    },
+    "blobs": {
+      "value": [
+        {
+          "name": "polarionblob",
+          "storageAccountName": "polarion",
+          "properties": {
+            "publicAccess": true,
+            "roleAssignments": [],
+            "immutabilityPolicyProperties": false,
+            "enableDefaultTelemetry": true
+          }
+        }
+      ]
+    }
+  }
+}

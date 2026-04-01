@@ -1,0 +1,29 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environmentType": {
+            "value": "PROD"
+        },
+        "environmentTypeLowerCase": {
+            "value": "prod"
+        },
+        "kvName": {
+            "value": "MS-POLARION-KV"
+        },
+        "UserAssignedManagedIdentity": {
+            "value": "Polarion-ManagedIdentity"
+        },
+        "tags": {
+            "value": {
+                "Solution": "MS-POLARION",
+                "ContactPerson": "Tore Melberg, Michael Rainer Haag",
+                "Email": "torme@equinor.com, mhaag@equinor.com",
+                "CostAllocationCode": "107505",
+                "CostAllocationType": "AppId",
+                "Team": "Management Systems",
+                "Repository": "https://github.com/equinor/MS-Polarion-infra"
+            }
+        }
+    }
+}

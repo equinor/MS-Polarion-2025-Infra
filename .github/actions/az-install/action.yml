@@ -1,0 +1,26 @@
+name: Azure Install
+description: Install PowerShell Az module
+inputs:
+  version:
+    required: false
+    description: Spesific version (1.2.3)
+
+runs:
+  using: "composite"
+  steps:
+    - name: Find latest version
+      id: get-current-version
+      shell: pwsh
+      run: write-output "version=$((Find-Module Az).Version)" >> $env:GITHUB_OUTPUT
+
+    - name: Setup PowerShell module cache
+      id: cacher
+      uses: actions/cache@v3
+      with:
+        path: ~/.local/share/powershell/Modules/Az*
+        key: az_cache-${{ inputs.version || steps.get-current-version.outputs.version }}
+
+    - name: Installing modules
+      if: steps.cacher.outputs.cache-hit != 'true'
+      shell: pwsh
+      run: Install-Module Az -Force -RequiredVersion ${{ inputs.version || steps.get-current-version.outputs.version }}

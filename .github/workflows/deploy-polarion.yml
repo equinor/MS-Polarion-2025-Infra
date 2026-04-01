@@ -1,0 +1,66 @@
+name: 🚀 Deploy polarion
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "Bicep/**"
+      - "Environments/**"
+      - ".github/**"
+      - "DeploymentFiles/**"
+      - "!Manual/**"
+      - "!**/.md"
+      - "template-bundles/**"
+
+run-name: ${{ github.actor }} MS - Polarion Deployment - Commit ${{ github.event.head_commit.message }}
+
+concurrency:
+  group: polarion-deployment
+
+permissions: {}
+  # contents: read # Required to checkout the repository
+  # id-token: write # Required to login to Azure using OIDC
+
+jobs:
+  deploy-polarion-dev:
+    name: Deploy Polarion - DEV - NorwayEast
+    uses: ./.github/workflows/reusable-Management-Systems-Classic.yml
+    secrets: inherit
+    permissions:
+      contents: read # Required to checkout the repository
+      id-token: write # Required to login to Azure using OIDC
+    with:
+      environmentName: "DEV"
+      resourceGroupName: "MS-Polarion-2025"
+      location: "NorwayEast"
+      environmentType: "NONPROD"
+
+  # deploy-polarion-qa:
+  #   needs: [deploy-polarion-dev]
+  #   name: Deploy Polarion - QA - NorwayEast
+  #   uses: ./.github/workflows/reusable-Management-Systems-Classic.yml
+  #   secrets: inherit
+  #   permissions:
+  #     contents: read # Required to checkout the repository
+  #     id-token: write # Required to login to Azure using OIDC
+  #   with:
+  #     environmentName: "QA"
+  #     resourceGroupName: "MS-Polarion-2025"
+  #     location: "NorwayEast"
+  #     environmentType: "NONPROD"
+
+  # deploy-polarion-prod:
+  #   needs: [deploy-polarion-qa]
+  #   name: Deploy Polarion - PROD - NorwayEast
+  #   uses: ./.github/workflows/reusable-Management-Systems-Classic.yml
+  #   secrets: inherit
+  #   permissions:
+  #     contents: read # Required to checkout the repository
+  #     id-token: write # Required to login to Azure using OIDC
+  #   with:
+  #     environmentName: "PROD"
+  #     resourceGroupName: "MS-Polarion-2025"
+  #     location: "NorwayEast"
+  #     environmentType: "PROD"

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentType": {
+      "value": "DEV"
+    },
+    "environmentTypeLowerCase": {
+      "value": "dev"
+    },
+    "kvName": {
+      "value": "MS-POLARION-KV2"
+    },
+    "UserAssignedManagedIdentity": {
+      "value": "Polarion-ManagedIdentity"
+    },
+    "keyVaultAccessObject": {
+      "value": [
+        {
+          "principalId": "9f6dae98-7c95-4b78-b3d6-6e0dda1c4bd2",
+          "roleDefinitionIdOrName": "Key Vault Administrator"
+        }
+      ]
+    },
+    "tags": {
+      "value": {
+        "Solution": "MS-POLARION",
+        "ContactPerson": "Tore Melberg, Michael Rainer Haag",
+        "Email": "torme@equinor.com, mhaag@equinor.com",
+        "CostAllocationCode": "107505",
+        "CostAllocationType": "APPID",
+        "Team": "Management Systems",
+        "Repository": "https://github.com/equinor/MS-Polarion-infra"
+      }
+    }
+  }
+}
