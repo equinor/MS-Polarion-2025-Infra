@@ -111,7 +111,7 @@ jobs:
 
             Write-Output "Time start deployment: $(get-date)"
             New-AzSubscriptionDeployment -Name "${{inputs.solution}}-ManualRun-$randomString" `
-                -TemplateFile ".\Bicep\main.bicep" `
+                -TemplateFile ".\template-bundles\omnia-classic\Management-Systems-Classic\main.bicep" `
                 -TemplateParameterFile ".\Bicep\Variables\${{inputs.environmentName}}\1.main.json" `
                 -rgName "${{inputs.resourceGroupName}}" `
                 -location "${{inputs.location}}" `
