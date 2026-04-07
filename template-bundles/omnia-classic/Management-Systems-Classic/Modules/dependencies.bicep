@@ -1,4 +1,4 @@
-@description('Keyvault Name to be used for storing secrets')
+@description('Keyvault Name to be used')
 param keyVaultName string
 
 @description('Environment to be deployed')
