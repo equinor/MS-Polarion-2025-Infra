@@ -12,6 +12,7 @@ param resourceGroupName string
 param keyvaultName string
 param solution string
 param keyVaultAccessObject array
+param subscriptionPrefix string
 
 @description('Environment to be deployed')
 @allowed([
@@ -44,7 +45,7 @@ module newRG 'br/public:avm/res/resources/resource-group:0.4.3' = {
   name: '${resourceGroupName}-${environment}'
   params: {
     location: rgLocation
-    name: toLower('${resourceGroupName}-${environment}')
+    name: toUpper('${subscriptionPrefix}-${resourceGroupName}-${environment}')
     tags: union(deploymentTags, tags, githubRepository)
   }
   dependsOn: []
