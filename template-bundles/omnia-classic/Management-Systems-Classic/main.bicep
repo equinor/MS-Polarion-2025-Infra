@@ -42,7 +42,7 @@ param deploymentTags object = {
 }
 
 module newRG 'br/public:avm/res/resources/resource-group:0.4.3' = {
-  name: '${resourceGroupName}-${environment}'
+  name: '${subscriptionPrefix}-${resourceGroupName}-${environment}'
   params: {
     location: rgLocation
     name: toUpper('${subscriptionPrefix}-${resourceGroupName}-${environment}')
