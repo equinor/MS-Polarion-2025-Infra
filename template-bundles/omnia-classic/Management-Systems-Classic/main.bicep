@@ -60,7 +60,7 @@ output keyvaultNameOutput string = keyvaultName
 module dependencyDeployment './Modules/dependencies.bicep' = {
   name: 'dependencyDeployment'
   params: {
-    resourceGroupName: '${subscriptionPrefix}-${resourceGroupName}-${environment}'
+    resourceGroupName: newRG.name
     rgLocation: rgLocation
     environment: environment
     keyVaultAccessObject: keyVaultAccessObject
