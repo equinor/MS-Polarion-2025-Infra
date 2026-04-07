@@ -119,7 +119,7 @@ jobs:
                 -solution "${{inputs.solution}}" `
                 -githubRepository (@{Repository = "https://github.com/equinor/news-scanner-infra"}) `
                 -environment "${{inputs.environmentName}}" `
-                -keyVaultName "$keyVaultName" -whatif
+                -keyVaultName "$keyVaultName" # -whatif
               Write-Output "Time end deployment: $(get-date)"
 
       # - name: Deploying Azure resources BaseLine - ResourceGroup and Keyvault
