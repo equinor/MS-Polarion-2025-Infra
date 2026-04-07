@@ -113,7 +113,7 @@ jobs:
             New-AzSubscriptionDeployment -Name "${{inputs.solution}}-ManualRun-$randomString" `
                 -TemplateFile ".\template-bundles\omnia-classic\Management-Systems-Classic\main.bicep" `
                 -TemplateParameterFile ".\template-bundles\omnia-classic\Management-Systems-Classic\${{inputs.environmentName}}\1.main.json" `
-                -rgName "${{inputs.resourceGroupName}}" `
+                -resourceGroupName "${{inputs.resourceGroupName}}" `
                 -location "${{inputs.location}}" `
                 -rgLocation "${{inputs.location}}" `
                 -solution "${{inputs.solution}}" `
