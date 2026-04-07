@@ -41,10 +41,10 @@ param deploymentTags object = {
 }
 
 module newRG 'br/public:avm/res/resources/resource-group:0.4.3' = {
-  name: '${rgName}-${environment}'
+  name: '${resourceGroupName}-${environment}'
   params: {
     location: rgLocation
-    name: toLower('${rgName}-${environment}')
+    name: toLower('${resourceGroupName}-${environment}')
     tags: union(deploymentTags, tags, githubRepository)
   }
   dependsOn: []
