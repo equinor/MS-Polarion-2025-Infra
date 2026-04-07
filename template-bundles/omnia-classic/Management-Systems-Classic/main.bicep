@@ -4,7 +4,6 @@ targetScope = 'subscription'
 // Needed Parameters 
 //////////////////////
 
-param rgName string
 param rgLocation string
 param subscriptionId string = subscription().subscriptionId
 param subscriptionName string = subscription().displayName
