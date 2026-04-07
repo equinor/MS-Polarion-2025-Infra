@@ -9,8 +9,9 @@ param subscriptionId string = subscription().subscriptionId
 param subscriptionName string = subscription().displayName
 param githubRepository object
 param resourceGroupName string
-param keyvaultName string = '${resourceGroupName}-kv-${environment}'
+param keyvaultName string
 param solution string
+param keyVaultAccessObject object
 
 @description('Environment to be deployed')
 @allowed([

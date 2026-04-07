@@ -5,14 +5,8 @@
     "environment": {
       "value": "DEV"
     },
-    "environmentLowerCase": {
-      "value": "dev"
-    },
-    "kvName": {
+    "keyvaultName": {
       "value": "MS-POLARION-2025-KV"
-    },
-    "UserAssignedManagedIdentity": {
-      "value": "Polarion-2025-MI"
     },
     "keyVaultAccessObject": {
       "value": [
