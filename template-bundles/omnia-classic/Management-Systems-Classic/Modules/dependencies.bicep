@@ -26,7 +26,7 @@ param resourceGroupName string
 param keyVaultAccessObject array
 
 resource newRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
-  name: '${resourceGroupName}-${environment}'
+  name: resourceGroupName
   scope: subscription()
 }
 
