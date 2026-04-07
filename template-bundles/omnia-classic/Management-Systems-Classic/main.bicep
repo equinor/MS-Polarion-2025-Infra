@@ -11,7 +11,7 @@ param githubRepository object
 param resourceGroupName string
 param keyvaultName string
 param solution string
-param keyVaultAccessObject object
+param keyVaultAccessObject array
 
 @description('Environment to be deployed')
 @allowed([
