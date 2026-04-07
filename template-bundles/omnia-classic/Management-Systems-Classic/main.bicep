@@ -50,8 +50,8 @@ module newRG 'br/public:avm/res/resources/resource-group:0.4.3' = {
   dependsOn: []
 }
 
-output rgNameLow string = toLower('${newRG.outputs.name}')
-output rgName string = newRG.outputs.name
+output rgNameLowOutput string = toLower('${newRG.outputs.name}')
+output rgNameOutput string = newRG.outputs.name
 output keyvaultNameOutput string = keyvaultName
 
 // Deploy Dependencies Below
