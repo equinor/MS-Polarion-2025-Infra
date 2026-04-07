@@ -56,3 +56,19 @@ output rgNameOutput string = newRG.outputs.name
 output keyvaultNameOutput string = keyvaultName
 
 // Deploy Dependencies Below
+
+module dependencyDeployment './Modules/dependencies.bicep' = {
+  name: 'dependencyDeployment'
+  params: {
+    resourceGroupName: newRG.outputs.name
+    rgLocation: rgLocation
+    environment: environment
+    keyVaultAccessObject: keyVaultAccessObject
+    keyVaultName: keyvaultName
+    tags: tags
+  }
+  scope: resourceGroup(newRG.name)
+  dependsOn: []
+}
+
+output dependencyDeploymentOutput object = dependencyDeployment.outputs
