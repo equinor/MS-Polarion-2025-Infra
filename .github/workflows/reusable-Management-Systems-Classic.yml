@@ -19,6 +19,10 @@ on:
         description: The type of environment, NONPROD or PROD.
         type: string
         required: true
+      solution:
+        description: solution to be deployed
+        type: string
+        required: true
 
 run-name: ${{ github.actor }} started deployment of MS Docmap - S499
 
@@ -104,6 +108,19 @@ jobs:
             # tar -xf azcopy.tar.gz --strip-components=1
             # sudo mv ./azcopy /usr/local/bin/
             # azcopy --version
+
+            Write-Output "Time start deployment: $(get-date)"
+            New-AzSubscriptionDeployment -Name "${{inputs.solution}}-ManualRun-$randomString" `
+                -TemplateFile ".\Bicep\main.bicep" `
+                -TemplateParameterFile ".\Bicep\Variables\${{inputs.environmentName}}\1.main.json" `
+                -rgName "${{inputs.resourceGroupName}}" `
+                -location "${{inputs.location}}" `
+                -rgLocation "${{inputs.location}}" `
+                -solution "${{inputs.solution}}" `
+                -githubRepository (@{Repository = "https://github.com/equinor/news-scanner-infra"}) `
+                -environment "${{inputs.environmentName}}" `
+                -keyVaultName "$keyVaultName" -whatif
+              Write-Output "Time end deployment: $(get-date)"
 
       # - name: Deploying Azure resources BaseLine - ResourceGroup and Keyvault
       #   shell: pwsh
