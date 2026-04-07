@@ -58,7 +58,7 @@ output newRGName string = newRG.outputs.name
 module dependencyDeployment './Modules/dependencies.bicep' = {
   name: 'dependencyDeployment'
   params: {
-    resourceGroupName: '${subscriptionPrefix}-${newRG.name}'
+    resourceGroupName: newRG.outputs.name
     rgLocation: rgLocation
     environment: environment
     keyVaultAccessObject: keyVaultAccessObject
