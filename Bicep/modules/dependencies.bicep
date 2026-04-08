@@ -71,3 +71,16 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
 output keyVaultName string = keyVault.outputs.name
 output keyVaultUrl string = keyVault.outputs.uri
 output keyVaultId string = keyVault.outputs.resourceId
+
+module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.15.0' = {
+  name: '${resourceGroupName}-law-${environment}'
+  params: {
+    location: rgLocation
+    name: '${toLower(resourceGroupName)}-law-${toLower(environment)}'
+    tags: union(deploymentTags, tags)
+  }
+  scope: resourceGroup(newRG.name)
+}
+
+output logAnalyticsWorkspaceName string = logAnalyticsWorkspace.outputs.name
+output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.outputs.resourceId
