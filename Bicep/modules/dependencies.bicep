@@ -33,6 +33,9 @@ param softDeleteRetentionInDays int = 7
 param networkAccessPolicies object
 param publicNetworkAccess string = 'Enabled'
 param solution string
+param skuName string
+param storageAccountName string
+
 param deploymentTags object = {
   Environment: environment
   SubscriptionId: subscription().subscriptionId
@@ -85,3 +88,17 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
 
 output logAnalyticsWorkspaceName string = logAnalyticsWorkspace.outputs.name
 output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.outputs.resourceId
+
+module storageAccount 'br/public:avm/res/storage/storage-account:0.32.0' = {
+  name: 'st${solution}${environment}'
+  params: {
+    location: rgLocation
+    name: toLower('${storageAccountName}${environment}')
+    skuName: skuName
+    publicNetworkAccess: publicNetworkAccess
+    tags: union(deploymentTags, tags)
+    networkAcls: networkAccessPolicies
+  }
+  dependsOn: []
+  scope: resourceGroup(newRG.name)
+}
