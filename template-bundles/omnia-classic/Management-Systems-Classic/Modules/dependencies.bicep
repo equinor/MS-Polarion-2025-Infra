@@ -44,28 +44,29 @@ resource newRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
 }
 
 output existingRGName string = newRG.name
+output keyvaultNameOutput string = keyVaultName
 
-module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
-  name: '${keyVaultName}${uniqueString(keyVaultName)}'
-  params: {
-    location: rgLocation
-    name: toLower(keyVaultName)
-    enableVaultForDeployment: enabledForDeployment
-    enableVaultForDiskEncryption: enabledForDiskEncryption
-    enableVaultForTemplateDeployment: enabledForTemplateDeployment
-    tags: union(deploymentTags, tags)
-    enablePurgeProtection: enablePurgeProtection
-    enableSoftDelete: enableSoftDelete
-    softDeleteRetentionInDays: 7
-    networkAcls: networkAccessPolicies
-    publicNetworkAccess: publicNetworkAccess
-    // accessPolicies: keyVaultAccessObject    
-    enableRbacAuthorization: true
-    roleAssignments: keyVaultAccessObject
-    createMode: 'default'
-  }
-  scope: resourceGroup(newRG.name)
-}
+// module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
+//   name: '${keyVaultName}${uniqueString(keyVaultName)}'
+//   params: {
+//     location: rgLocation
+//     name: toLower(keyVaultName)
+//     enableVaultForDeployment: enabledForDeployment
+//     enableVaultForDiskEncryption: enabledForDiskEncryption
+//     enableVaultForTemplateDeployment: enabledForTemplateDeployment
+//     tags: union(deploymentTags, tags)
+//     enablePurgeProtection: enablePurgeProtection
+//     enableSoftDelete: enableSoftDelete
+//     softDeleteRetentionInDays: 7
+//     networkAcls: networkAccessPolicies
+//     publicNetworkAccess: publicNetworkAccess
+//     // accessPolicies: keyVaultAccessObject    
+//     enableRbacAuthorization: true
+//     roleAssignments: keyVaultAccessObject
+//     createMode: 'default'
+//   }
+//   scope: resourceGroup(newRG.name)
+// }
 
 // output keyVaultName string = keyVault.outputs.name
 // output keyVaultUrl string = keyVault.outputs.uri
