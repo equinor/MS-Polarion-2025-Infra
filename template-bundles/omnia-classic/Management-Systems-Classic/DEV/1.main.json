@@ -26,7 +26,7 @@
     "networkAccessPolicies": {
       "value": {
         "ipRules": [],
-        "defaultAction": "Allow",
+        "defaultAction": "Deny",
         "bypass": "AzureServices"
       }
     },
