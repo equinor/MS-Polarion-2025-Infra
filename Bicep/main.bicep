@@ -14,6 +14,8 @@ param solution string
 param keyVaultAccessObject array
 param subscriptionPrefix string
 param networkAccessPolicies object
+param skuName string
+param storageAccountName string
 
 @description('Environment to be deployed')
 @allowed([
@@ -67,6 +69,8 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     tags: tags
     networkAccessPolicies: networkAccessPolicies
     solution: solution
+    skuName: skuName
+    storageAccountName: storageAccountName
   }
   scope: resourceGroup(newRG.name)
   dependsOn: []
