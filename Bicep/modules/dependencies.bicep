@@ -32,6 +32,7 @@ param enableSoftDelete bool = true
 param softDeleteRetentionInDays int = 7
 param networkAccessPolicies object
 param publicNetworkAccess string = 'Enabled'
+param solution string
 param deploymentTags object = {
   Environment: environment
   SubscriptionId: subscription().subscriptionId
@@ -73,10 +74,10 @@ output keyVaultUrl string = keyVault.outputs.uri
 output keyVaultId string = keyVault.outputs.resourceId
 
 module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.15.0' = {
-  name: '${resourceGroupName}-law-${environment}'
+  name: '${solution}-law-${environment}'
   params: {
     location: rgLocation
-    name: '${toLower(resourceGroupName)}-law-${toLower(environment)}'
+    name: '${toLower(solution)}-law-${toLower(environment)}'
     tags: union(deploymentTags, tags)
   }
   scope: resourceGroup(newRG.name)
