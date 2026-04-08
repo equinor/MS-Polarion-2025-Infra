@@ -15,7 +15,7 @@ runs:
 
     - name: Setup PowerShell module cache
       id: cacher
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: ~/.local/share/powershell/Modules/Az*
         key: az_cache-${{ inputs.version || steps.get-current-version.outputs.version }}

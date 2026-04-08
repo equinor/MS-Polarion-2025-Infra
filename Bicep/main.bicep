@@ -56,7 +56,7 @@ output newRGName string = newRG.outputs.name
 
 // Deploy Dependencies Below
 
-module dependencyDeployment './Modules/dependencies.bicep' = {
+module dependencyDeployment './modules/dependencies.bicep' = {
   name: 'dependencyDeployment'
   params: {
     resourceGroupName: newRG.outputs.name
