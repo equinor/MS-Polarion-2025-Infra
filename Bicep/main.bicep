@@ -66,6 +66,7 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     keyVaultName: keyVaultName
     tags: tags
     networkAccessPolicies: networkAccessPolicies
+    solution: solution
   }
   scope: resourceGroup(newRG.name)
   dependsOn: []
