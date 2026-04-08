@@ -31,6 +31,7 @@ resource newRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
 }
 
 output existingRGName string = newRG.name
+output keyvaultNameOutput string = keyVaultName
 
 // module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
 //   name: '${keyVaultName}${uniqueString(keyVaultName)}'
