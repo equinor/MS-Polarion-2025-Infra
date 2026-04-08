@@ -25,7 +25,9 @@
     },
     "networkAccessPolicies": {
       "value": {
-        "ipRules": [],
+        "ipRules": [
+          "136.164.1.0/24"
+        ],
         "defaultAction": "Deny",
         "bypass": "AzureServices"
       }
