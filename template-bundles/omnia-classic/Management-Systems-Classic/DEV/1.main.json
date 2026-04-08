@@ -23,6 +23,13 @@
         }
       ]
     },
+    "networkAccessPolicies": {
+      "value": {
+        "ipRules": [],
+        "defaultAction": "Allow",
+        "bypass": "AzureServices"
+      }
+    },
     "tags": {
       "value": {
         "Solution": "MS-POLARION-2025",

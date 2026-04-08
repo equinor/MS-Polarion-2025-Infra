@@ -24,6 +24,19 @@ param tags object
 param rgLocation string
 param resourceGroupName string
 param keyVaultAccessObject array
+param enabledForDeployment bool = true
+param enabledForDiskEncryption bool = true
+param enabledForTemplateDeployment bool = true
+param enablePurgeProtection bool = true
+param enableSoftDelete bool = true
+param softDeleteRetentionInDays int = 7
+param networkAccessPolicies object
+param publicNetworkAccess string = 'Enabled'
+param deploymentTags object = {
+  Environment: environment
+  SubscriptionId: subscription().subscriptionId
+  SubscriptionName: subscription().displayName
+}
 
 resource newRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   name: resourceGroupName
@@ -32,27 +45,27 @@ resource newRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
 
 output existingRGName string = newRG.name
 
-// module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
-//   name: '${keyVaultName}${uniqueString(keyVaultName)}'
-//   params: {
-//     location: rgLocation
-//     name: toLower(keyVaultName)
-//     enableVaultForDeployment: enabledForDeployment
-//     enableVaultForDiskEncryption: enabledForDiskEncryption
-//     enableVaultForTemplateDeployment: enabledForTemplateDeployment
-//     tags: union(deploymentTags, tags, githubRepository)
-//     enablePurgeProtection: enablePurgeProtection
-//     enableSoftDelete: enableSoftDelete
-//     softDeleteRetentionInDays: 7
-//     networkAcls: networkAccessPolicies
-//     publicNetworkAccess: publicNetworkAccess
-//     // accessPolicies: keyVaultAccessObject    
-//     enableRbacAuthorization: true
-//     roleAssignments: keyVaultAccessObject
-//     createMode: 'default'
-//   }
-//   scope: resourceGroup(newRG.name)
-// }
+module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
+  name: '${keyVaultName}${uniqueString(keyVaultName)}'
+  params: {
+    location: rgLocation
+    name: toLower(keyVaultName)
+    enableVaultForDeployment: enabledForDeployment
+    enableVaultForDiskEncryption: enabledForDiskEncryption
+    enableVaultForTemplateDeployment: enabledForTemplateDeployment
+    tags: union(deploymentTags, tags)
+    enablePurgeProtection: enablePurgeProtection
+    enableSoftDelete: enableSoftDelete
+    softDeleteRetentionInDays: 7
+    networkAcls: networkAccessPolicies
+    publicNetworkAccess: publicNetworkAccess
+    // accessPolicies: keyVaultAccessObject    
+    enableRbacAuthorization: true
+    roleAssignments: keyVaultAccessObject
+    createMode: 'default'
+  }
+  scope: resourceGroup(newRG.name)
+}
 
 // output keyVaultName string = keyVault.outputs.name
 // output keyVaultUrl string = keyVault.outputs.uri
