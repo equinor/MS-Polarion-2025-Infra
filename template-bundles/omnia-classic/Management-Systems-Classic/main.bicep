@@ -9,7 +9,7 @@ param subscriptionId string = subscription().subscriptionId
 param subscriptionName string = subscription().displayName
 param githubRepository object
 param resourceGroupName string
-param keyvaultName string
+param keyVaultName string
 param solution string
 param keyVaultAccessObject array
 param subscriptionPrefix string
@@ -63,7 +63,7 @@ module dependencyDeployment './Modules/dependencies.bicep' = {
     rgLocation: rgLocation
     environment: environment
     keyVaultAccessObject: keyVaultAccessObject
-    keyVaultName: keyvaultName
+    keyVaultName: keyVaultName
     tags: tags
     networkAccessPolicies: networkAccessPolicies
   }

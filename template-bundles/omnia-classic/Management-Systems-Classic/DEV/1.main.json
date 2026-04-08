@@ -8,7 +8,7 @@
     "environment": {
       "value": "DEV"
     },
-    "keyvaultName": {
+    "keyVaultName": {
       "value": "MS-POLARION-2025-KV"
     },
     "keyVaultAccessObject": {
