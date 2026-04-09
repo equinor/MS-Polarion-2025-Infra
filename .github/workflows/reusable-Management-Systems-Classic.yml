@@ -108,6 +108,8 @@ jobs:
             # tar -xf azcopy.tar.gz --strip-components=1
             # sudo mv ./azcopy /usr/local/bin/
             # azcopy --version
+            $runner = (Invoke-RestMethod -Uri https://ipinfo.io/json).ip
+            Write-Output "Runner: $runner"
 
             Write-Output "Time start deployment: $(get-date)"
             New-AzSubscriptionDeployment -Name "${{inputs.solution}}-ManualRun-$randomString" `
@@ -118,7 +120,7 @@ jobs:
                 -rgLocation "${{inputs.location}}" `
                 -solution "${{inputs.solution}}" `
                 -githubRepository (@{Repository = "https://github.com/equinor/news-scanner-infra"}) `
-                -environment "${{inputs.environmentName}}" # -whatif
+                -environment "${{inputs.environmentName}}" -runner $runner # -whatif
               Write-Output "Time end deployment: $(get-date)"
 
       # - name: Deploying Azure resources BaseLine - ResourceGroup and Keyvault

@@ -47,8 +47,22 @@ resource newRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   scope: subscription()
 }
 
+param runner string
+
 output existingRGName string = newRG.name
 output keyvaultNameOutput string = keyVaultName
+
+var networkAccessPoliciesWithRunner = union(networkAccessPolicies, {
+  defaultAction: 'Deny'
+  bypass: 'AzureServices'
+  virtualNetworkRules: []
+  ipRules: [
+    {
+      value: runner
+      action: 'Allow'
+    }
+  ]
+})
 
 module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
   name: '${keyVaultName}${uniqueString(keyVaultName)}'
@@ -62,7 +76,7 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
     enablePurgeProtection: enablePurgeProtection
     enableSoftDelete: enableSoftDelete
     softDeleteRetentionInDays: softDeleteRetentionInDays
-    networkAcls: networkAccessPolicies
+    networkAcls: networkAccessPoliciesWithRunner
     publicNetworkAccess: publicNetworkAccess
     // accessPolicies: keyVaultAccessObject    
     enableRbacAuthorization: true
