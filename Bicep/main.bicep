@@ -17,6 +17,7 @@ param networkAccessPolicies object
 param skuName string
 param storageAccountName string
 param runner string
+param publicNetworkAccessLogAnalytics string = 'Disabled'
 
 @description('Environment to be deployed')
 @allowed([
@@ -73,6 +74,7 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     skuName: skuName
     storageAccountName: storageAccountName
     runner: runner
+    publicNetworkAccessLogAnalytics: publicNetworkAccessLogAnalytics
   }
   scope: resourceGroup(newRG.name)
   dependsOn: []

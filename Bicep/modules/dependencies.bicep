@@ -31,7 +31,8 @@ param enablePurgeProtection bool = false
 param enableSoftDelete bool = true
 param softDeleteRetentionInDays int = 7
 param networkAccessPolicies object
-param publicNetworkAccess string = 'Disabled'
+param publicNetworkAccess string = 'Enabled'
+param publicNetworkAccessLogAnalytics string
 param solution string
 param skuName string
 param storageAccountName string
@@ -93,8 +94,8 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
     location: rgLocation
     name: '${toLower(solution)}-law-${toLower(environment)}'
     tags: union(deploymentTags, tags)
-    publicNetworkAccessForIngestion: publicNetworkAccess
-    publicNetworkAccessForQuery: publicNetworkAccess
+    publicNetworkAccessForIngestion: publicNetworkAccessLogAnalytics
+    publicNetworkAccessForQuery: publicNetworkAccessLogAnalytics
   }
   scope: resourceGroup(newRG.name)
 }
