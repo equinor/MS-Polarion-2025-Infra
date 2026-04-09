@@ -16,6 +16,7 @@ param subscriptionPrefix string
 param networkAccessPolicies object
 param skuName string
 param storageAccountName string
+param runner string
 
 @description('Environment to be deployed')
 @allowed([
@@ -71,6 +72,7 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     solution: solution
     skuName: skuName
     storageAccountName: storageAccountName
+    runner: runner
   }
   scope: resourceGroup(newRG.name)
   dependsOn: []
