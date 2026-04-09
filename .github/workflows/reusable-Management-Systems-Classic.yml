@@ -119,6 +119,11 @@ jobs:
           inlineScript: |
             Push-Location ./Manual
 
+            # Check for external IP address
+            $runner2 = (Invoke-RestMethod -Uri https://ipinfo.io/json).ip
+            Write-Output "Runner: $runner2"
+
+
             $vms = 1..5
             $sqlServers = 1..1
             $passPhrase = 1..1
