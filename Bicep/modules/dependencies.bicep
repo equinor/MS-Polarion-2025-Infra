@@ -27,11 +27,11 @@ param keyVaultAccessObject array
 param enabledForDeployment bool = true
 param enabledForDiskEncryption bool = true
 param enabledForTemplateDeployment bool = true
-param enablePurgeProtection bool = true
+param enablePurgeProtection bool = false
 param enableSoftDelete bool = true
 param softDeleteRetentionInDays int = 7
 param networkAccessPolicies object
-param publicNetworkAccess string = 'Enabled'
+param publicNetworkAccess string = 'Disabled'
 param solution string
 param skuName string
 param storageAccountName string
@@ -96,6 +96,8 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
     location: rgLocation
     name: '${toLower(solution)}-law-${toLower(environment)}'
     tags: union(deploymentTags, tags)
+    publicNetworkAccessForIngestion: publicNetworkAccess
+    publicNetworkAccessForQuery: publicNetworkAccess
   }
   scope: resourceGroup(newRG.name)
 }
