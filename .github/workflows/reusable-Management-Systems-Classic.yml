@@ -95,6 +95,10 @@ jobs:
             Import-Module Microsoft.PowerShell.SecretManagement
             Import-Module Az.KeyVault
 
+            # Check for external IP address
+            $runner = (Invoke-RestMethod -Uri https://ipinfo.io/json).ip
+            Write-Output "Runner: $runner"
+
 
             Write-Output "Time start deployment: $(get-date)"
             New-AzSubscriptionDeployment -Name "${{inputs.solution}}-ManualRun-$randomString" `
