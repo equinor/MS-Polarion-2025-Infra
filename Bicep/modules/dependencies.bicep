@@ -53,15 +53,12 @@ output existingRGName string = newRG.name
 output keyvaultNameOutput string = keyVaultName
 
 var networkAccessPoliciesWithRunner = union(networkAccessPolicies, {
-  defaultAction: 'Deny'
-  bypass: 'AzureServices'
-  virtualNetworkRules: []
-  ipRules: [
+  ipRules: concat(networkAccessPolicies.?ipRules ?? [], [
     {
       value: runner
       action: 'Allow'
     }
-  ]
+  ])
 })
 
 module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
