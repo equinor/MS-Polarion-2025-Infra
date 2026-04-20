@@ -58,6 +58,19 @@ module newRG 'br/public:avm/res/resources/resource-group:0.4.3' = {
 
 output newRGName string = newRG.outputs.name
 
+// Recovery Services Vault RG
+module recoveryServicesVaultRG 'br/public:avm/res/resources/resource-group:0.4.3' = {
+  name: '${subscriptionPrefix}-${resourceGroupName}-${environment}-rsv'
+  params: {
+    location: rgLocation
+    name: toUpper('${subscriptionPrefix}-${resourceGroupName}-${environment}-rsv')
+    tags: union(deploymentTags, tags, githubRepository)
+  }
+  dependsOn: []
+}
+
+output recoveryServicesVaultRGName string = recoveryServicesVaultRG.outputs.name
+
 // Deploy Dependencies Below
 
 module dependencyDeployment './modules/dependencies.bicep' = {
