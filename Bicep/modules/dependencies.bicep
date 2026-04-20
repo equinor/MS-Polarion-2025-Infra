@@ -48,6 +48,13 @@ resource newRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
   scope: subscription()
 }
 
+param recoveryServicesVaultRGName string
+
+resource recoveryServicesVaultRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
+  name: recoveryServicesVaultRGName
+  scope: subscription()
+}
+
 param runner string
 
 output existingRGName string = newRG.name
@@ -115,4 +122,21 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.32.0' = {
   }
   dependsOn: []
   scope: resourceGroup(newRG.name)
+}
+
+// param enableSoftDelete bool = false
+// param softDeleteRetentionInDays int = 7
+
+module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' = {
+  name: '${solution}-rsv-${environment}'
+  params: {
+    location: rgLocation
+    name: '${toLower(solution)}-rsv-${toLower(environment)}'
+    tags: union(deploymentTags, tags)
+    publicNetworkAccess: publicNetworkAccess
+    immutabilitySettingState: 'Unlocked'
+  }
+  // networkAcls: networkAccessPolicies
+  dependsOn: []
+  scope: resourceGroup(recoveryServicesVaultRG.name)
 }
