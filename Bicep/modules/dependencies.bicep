@@ -135,6 +135,11 @@ module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' 
     tags: union(deploymentTags, tags)
     publicNetworkAccess: publicNetworkAccess
     immutabilitySettingState: 'Unlocked'
+    softDeleteSettings: {
+      softDeleteRetentionPeriodInDays: softDeleteRetentionInDays
+      softDeleteState: 'Disabled'
+      enhancedSecurityState: 'Disabled'
+    }
   }
   // networkAcls: networkAccessPolicies
   dependsOn: []
