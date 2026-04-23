@@ -14,6 +14,8 @@ param solution string
 param keyVaultAccessObject array
 param subscriptionPrefix string
 param networkAccessPolicies object
+@description('Subnet configuration for workload placement.')
+param subnetConfig object
 param skuName string
 param storageAccountName string
 param runner string
@@ -83,6 +85,7 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     keyVaultName: keyVaultName
     tags: tags
     networkAccessPolicies: networkAccessPolicies
+    subnetConfig: subnetConfig
     solution: solution
     skuName: skuName
     storageAccountName: storageAccountName
