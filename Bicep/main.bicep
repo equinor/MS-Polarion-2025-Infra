@@ -88,6 +88,7 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     storageAccountName: storageAccountName
     runner: runner
     publicNetworkAccessLogAnalytics: publicNetworkAccessLogAnalytics
+    recoveryServicesVaultRGName: recoveryServicesVaultRG.outputs.name
   }
   scope: resourceGroup(newRG.name)
   dependsOn: []
