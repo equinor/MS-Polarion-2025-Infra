@@ -89,6 +89,12 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
     // accessPolicies: keyVaultAccessObject    
     enableRbacAuthorization: true
     roleAssignments: keyVaultAccessObject
+    privateEndpoints: [
+      {
+        subnetResourceId: subnetConfig.privateEndpoints
+        service: 'vault'
+      }
+    ]
     createMode: 'default'
   }
   scope: resourceGroup(newRG.name)
@@ -97,6 +103,7 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
 output keyVaultName string = keyVault.outputs.name
 output keyVaultUrl string = keyVault.outputs.uri
 output keyVaultId string = keyVault.outputs.resourceId
+output keyVaultPrivateEndpoints array = keyVault.outputs.privateEndpoints
 
 module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0.15.0' = {
   name: '${solution}-law-${environment}'
