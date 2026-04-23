@@ -63,6 +63,8 @@ output existingRGName string = newRG.name
 output keyvaultNameOutput string = keyVaultName
 output subnetConfigOutput object = subnetConfig
 
+param virtualNetworkExternalId string = '/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/s499-noe-network/providers/microsoft.network/virtualnetworks/s499-noe-vnet'
+
 var networkAccessPoliciesWithRunner = union(networkAccessPolicies, {
   ipRules: concat(networkAccessPolicies.?ipRules ?? [], [
     {
@@ -70,6 +72,13 @@ var networkAccessPoliciesWithRunner = union(networkAccessPolicies, {
       action: 'Allow'
     }
   ])
+  virtualNetworkRules: [
+    {
+      id: '${virtualNetworkExternalId}/subnets/s499-noe-subnet'
+      action: 'Allow'
+      ignoreMissingVnetServiceEndpoint: true
+    }
+  ]
 })
 
 module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
