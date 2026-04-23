@@ -31,6 +31,8 @@ param enablePurgeProtection bool = false
 param enableSoftDelete bool = true
 param softDeleteRetentionInDays int = 7
 param networkAccessPolicies object
+@description('Subnet configuration passed from the environment parameter file.')
+param subnetConfig object
 param publicNetworkAccess string = 'Enabled'
 param publicNetworkAccessLogAnalytics string
 param solution string
@@ -59,6 +61,7 @@ param runner string
 
 output existingRGName string = newRG.name
 output keyvaultNameOutput string = keyVaultName
+output subnetConfigOutput object = subnetConfig
 
 var networkAccessPoliciesWithRunner = union(networkAccessPolicies, {
   ipRules: concat(networkAccessPolicies.?ipRules ?? [], [
