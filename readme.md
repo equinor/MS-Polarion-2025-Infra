@@ -93,6 +93,15 @@ New-AzSubscriptionDeployment \
   -runner "<public-runner-ip>"
 ```
 
+### Bootstrap And Harden Key Vault Access
+
+For first-time deployment where secrets must be seeded from pipeline:
+
+- Bootstrap run: set `includeRunnerAccess=true` and pass `initialKeyVaultSecrets`.
+- Harden run: set `includeRunnerAccess=false` after secrets are created.
+
+This keeps temporary runner access only for bootstrap and removes it in the final state.
+
 ## Network And Subnets
 
 Subnet planning and examples are documented in [docs/subnet.md](docs/subnet.md).

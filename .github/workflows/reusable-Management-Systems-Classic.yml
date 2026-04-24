@@ -109,7 +109,9 @@ jobs:
                 -rgLocation "${{inputs.location}}" `
                 -solution "${{inputs.solution}}" `
                 -githubRepository (@{Repository = "https://github.com/equinor/news-scanner-infra"}) `
-                -environment "${{inputs.environmentName}}" -runner $runner # -whatif
+                -environment "${{inputs.environmentName}}" `
+                -runner $runner `
+                -includeRunnerAccess $true # -whatif
               Write-Output "Time end deployment: $(get-date)"
 
       - name: Deploy Step 2 - Deploy Credentials to Keyvault
@@ -131,11 +133,11 @@ jobs:
 
             Foreach ($vm in $vms) {
               $existing = @()
-              $existing = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ inputs.subscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}"
+              $existing = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}"
 
               if ($null -like $existing) {
                 Write-Output "Secret does not exist, generating secret..." 
-                $credentialsToCreate.Add("${{ inputs.subscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}", $(.\GeneratePassword.ps1))
+                $credentialsToCreate.Add("${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}", $(.\GeneratePassword.ps1))
               }
               else {
                 Write-Output "Secret exists, skipping recreation..."
@@ -144,11 +146,11 @@ jobs:
 
             Foreach ($sqlserver in $sqlServers) {
               $sqexisting = @()
-              $sqexisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ inputs.subscriptionPrefix }}POLSQ$('{0:d2}' -f $sqlserver)${{ inputs.environmentName }}"
+              $sqexisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $sqlserver)${{ inputs.environmentName }}"
 
               if ($null -like $sqexisting) {
                 Write-Output "Secret does not exist, generating secret..." 
-                $credentialsToCreate.Add("${{ inputs.subscriptionPrefix }}POLSQ$('{0:d2}' -f $sqlserver)${{ inputs.environmentName }}", $(.\GeneratePassword.ps1))
+                $credentialsToCreate.Add("${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $sqlserver)${{ inputs.environmentName }}", $(.\GeneratePassword.ps1))
               }
               else {
                 Write-Output "Secret exists, skipping recreation..."
@@ -157,11 +159,11 @@ jobs:
 
             Foreach ($p in $passPhrase) {
               $passExisting = @()
-              $passExisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ inputs.subscriptionPrefix }}POLSQ$('{0:d2}' -f $p)${{ inputs.environmentName }}-passPhrase"
+              $passExisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $p)${{ inputs.environmentName }}-passPhrase"
 
               if ($null -like $passExisting) {
                 Write-Output "Secret does not exist, generating secret..." 
-                $credentialsToCreate.Add("${{ inputs.subscriptionPrefix }}POLSQ$('{0:d2}' -f $p)${{ inputs.environmentName }}-passPhrase", $(.\GeneratePassword.ps1))
+                $credentialsToCreate.Add("${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $p)${{ inputs.environmentName }}-passPhrase", $(.\GeneratePassword.ps1))
               }
               else {
                 Write-Output "Secret exists, skipping recreation..."
@@ -175,5 +177,28 @@ jobs:
             #   -credentialsToCreate $CredentialsToCreate `
             #   -environment "${{ inputs.environmentName }}" `
             #   -keyVaultName '${{ inputs.solution }}-Kv-${{ inputs.environmentName }}' `
-            #   -ResourceGroupName '${{ inputs.resourceGroupNameBase }}-${{ inputs.environmentName }}' `
+            #   -ResourceGroupName '${{ inputs.resourceGroupName }}-${{ inputs.environmentName }}' `
             #   -rgLocation "${{ env.location }}" # -whatif
+
+      - name: Deploy Step 3 - Harden Key Vault Network Access
+        uses: azure/powershell@v3
+        with:
+          azPSVersion: "latest"
+          inlineScript: |
+            # Runner parameter is still required by the template, but runner access is explicitly disabled below.
+            $runner = (Invoke-RestMethod -Uri https://ipinfo.io/json).ip
+            Write-Output "Runner: $runner"
+
+            Write-Output "Time start hardening deployment: $(get-date)"
+            New-AzSubscriptionDeployment -Name "${{inputs.solution}}-Harden-$randomString" `
+                -TemplateFile ".\Bicep\main.bicep" `
+                -TemplateParameterFile ".\Bicep\Environments\${{inputs.environmentName}}\1.main.json" `
+                -resourceGroupName "${{inputs.resourceGroupName}}" `
+                -location "${{inputs.location}}" `
+                -rgLocation "${{inputs.location}}" `
+                -solution "${{inputs.solution}}" `
+                -githubRepository (@{Repository = "https://github.com/equinor/news-scanner-infra"}) `
+                -environment "${{inputs.environmentName}}" `
+                -runner $runner `
+                -includeRunnerAccess $false # -whatif
+            Write-Output "Time end hardening deployment: $(get-date)"
