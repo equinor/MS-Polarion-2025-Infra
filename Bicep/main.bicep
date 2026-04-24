@@ -19,8 +19,14 @@ param subnetConfig object
 param skuName string
 param storageAccountName string
 param runner string
+@description('Controls whether the GitHub runner IP is temporarily allowed in Key Vault network ACLs during bootstrap.')
+param includeRunnerAccess bool = true
 param publicNetworkAccessLogAnalytics string = 'Disabled'
 param vmAdminPasswordSecretNameSuffix string = '-localadmin-password'
+
+@secure()
+@description('Initial Key Vault secrets to seed on first deployment. Object format: { "secret-name": "secret-value" }.')
+param initialKeyVaultSecrets object = {}
 
 @description('Environment to be deployed')
 @allowed([
@@ -91,6 +97,7 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     skuName: skuName
     storageAccountName: storageAccountName
     runner: runner
+    includeRunnerAccess: includeRunnerAccess
     publicNetworkAccessLogAnalytics: publicNetworkAccessLogAnalytics
     recoveryServicesVaultRGName: recoveryServicesVaultRG.outputs.name
   }
@@ -99,6 +106,15 @@ module dependencyDeployment './modules/dependencies.bicep' = {
 }
 
 output dependencyDeploymentOutput object = dependencyDeployment.outputs
+
+module keyVaultResources './modules/keyvault-resources.bicep' = {
+  name: 'keyVaultResources'
+  params: {
+    keyVaultName: dependencyDeployment.outputs.keyVaultName
+    credentials: initialKeyVaultSecrets
+  }
+  scope: resourceGroup(newRG.name)
+}
 
 module mainDeployment './modules/main-deployment.bicep' = {
   name: 'mainDeployment'

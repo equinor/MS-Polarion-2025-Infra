@@ -38,6 +38,8 @@ param publicNetworkAccessLogAnalytics string
 param solution string
 param skuName string
 param storageAccountName string
+@description('Controls whether the GitHub runner IP is appended to Key Vault IP rules.')
+param includeRunnerAccess bool = true
 
 param deploymentTags object = {
   Environment: environment
@@ -63,13 +65,17 @@ output existingRGName string = newRG.name
 output keyvaultNameOutput string = keyVaultName
 output subnetConfigOutput object = subnetConfig
 
+var runnerIpRules = includeRunnerAccess
+  ? [
+      {
+        value: runner
+        action: 'Allow'
+      }
+    ]
+  : []
+
 var networkAccessPoliciesWithRunner = union(networkAccessPolicies, {
-  ipRules: concat(networkAccessPolicies.?ipRules ?? [], [
-    {
-      value: runner
-      action: 'Allow'
-    }
-  ])
+  ipRules: concat(networkAccessPolicies.?ipRules ?? [], runnerIpRules)
   virtualNetworkRules: [
     {
       id: subnetConfig.compute
