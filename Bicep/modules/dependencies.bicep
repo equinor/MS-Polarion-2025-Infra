@@ -70,6 +70,13 @@ var networkAccessPoliciesWithRunner = union(networkAccessPolicies, {
       action: 'Allow'
     }
   ])
+  virtualNetworkRules: [
+    {
+      id: subnetConfig.compute
+      action: 'Allow'
+      ignoreMissingVnetServiceEndpoint: true
+    }
+  ]
 })
 
 module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
@@ -86,7 +93,7 @@ module keyVault 'br/public:avm/res/key-vault/vault:0.13.3' = {
     softDeleteRetentionInDays: softDeleteRetentionInDays
     networkAcls: networkAccessPoliciesWithRunner
     publicNetworkAccess: publicNetworkAccess
-    // accessPolicies: keyVaultAccessObject    
+    accessPolicies: keyVaultAccessObject
     enableRbacAuthorization: true
     roleAssignments: keyVaultAccessObject
     privateEndpoints: [

@@ -20,6 +20,7 @@ param skuName string
 param storageAccountName string
 param runner string
 param publicNetworkAccessLogAnalytics string = 'Disabled'
+param vmAdminPasswordSecretNameSuffix string = '-localadmin-password'
 
 @description('Environment to be deployed')
 @allowed([
@@ -98,3 +99,20 @@ module dependencyDeployment './modules/dependencies.bicep' = {
 }
 
 output dependencyDeploymentOutput object = dependencyDeployment.outputs
+
+module mainDeployment './modules/main-deployment.bicep' = {
+  name: 'mainDeployment'
+  params: {
+    environment: environment
+    subnetConfig: subnetConfig
+    keyVaultName: dependencyDeployment.outputs.keyVaultName
+    vmAdminPasswordSecretNameSuffix: vmAdminPasswordSecretNameSuffix
+    tags: tags
+  }
+  scope: resourceGroup(newRG.name)
+}
+
+output mainDeploymentOutput object = {
+  deployedVmNames: mainDeployment.outputs.deployedVmNames
+  deployedVmIds: mainDeployment.outputs.deployedVmIds
+}
