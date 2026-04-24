@@ -107,14 +107,14 @@ module dependencyDeployment './modules/dependencies.bicep' = {
 
 output dependencyDeploymentOutput object = dependencyDeployment.outputs
 
-module keyVaultResources './modules/keyvault-resources.bicep' = {
-  name: 'keyVaultResources'
-  params: {
-    keyVaultName: dependencyDeployment.outputs.keyVaultName
-    credentials: initialKeyVaultSecrets
-  }
-  scope: resourceGroup(newRG.name)
-}
+// module keyVaultResources './modules/keyvault-resources.bicep' = {
+//   name: 'keyVaultResources'
+//   params: {
+//     keyVaultName: dependencyDeployment.outputs.keyVaultName
+//     credentials: initialKeyVaultSecrets
+//   }
+//   scope: resourceGroup(newRG.name)
+// }
 
 module mainDeployment './modules/main-deployment.bicep' = {
   name: 'mainDeployment'
