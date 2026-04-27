@@ -171,13 +171,13 @@ jobs:
             }
             Pop-Location
 
-            Write-Output "Deploying credentials..."
+            Write-Output "Deploying credentials... - ${{ inputs.resourceGroupName }}"
             New-AzResourceGroupDeployment -Name "Step-2-${{ github.actor }}-$(get-date -format 'yyyy.MM.dd')" `
               -TemplateFile .\Bicep\modules\keyvault-resources.bicep `
               -credentials $CredentialsToCreate `
               -environment "${{ inputs.environmentName }}" `
               -keyVaultName '${{ inputs.solution }}-Kv-${{ inputs.environmentName }}' `
-              -ResourceGroupName '${{ inputs.resourceGroupName }}-${{ inputs.environmentName }}' `
+              -resourceGroupName "${{inputs.resourceGroupName}}" `
               -rgLocation "${{ env.location }}" -whatif
 
       - name: Deploy Step 3 - Harden Key Vault Network Access
