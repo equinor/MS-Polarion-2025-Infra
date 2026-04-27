@@ -174,7 +174,7 @@ jobs:
             Write-Output "Deploying credentials..."
             New-AzResourceGroupDeployment -Name "Step-2-${{ github.actor }}-$(get-date -format 'yyyy.MM.dd')" `
               -TemplateFile .\Bicep\keyvault-resources.bicep `
-              -credentialsToCreate $CredentialsToCreate `
+              -credentials $CredentialsToCreate `
               -environment "${{ inputs.environmentName }}" `
               -keyVaultName '${{ inputs.solution }}-Kv-${{ inputs.environmentName }}' `
               -ResourceGroupName '${{ inputs.resourceGroupName }}-${{ inputs.environmentName }}' `
