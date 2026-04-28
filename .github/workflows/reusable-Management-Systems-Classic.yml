@@ -179,7 +179,7 @@ jobs:
               -keyVaultName '${{ inputs.solution }}-Kv-${{ inputs.environmentName }}' `
               -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -rgName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
-              -rgLocation "${{ env.location }}" -whatif
+              -rgLocation "${{ env.location }}" # -whatif
 
       - name: Deploy Step 3 - Harden Key Vault Network Access
         uses: azure/powershell@v3
