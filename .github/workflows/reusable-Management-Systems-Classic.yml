@@ -178,6 +178,7 @@ jobs:
               -environment "${{ inputs.environmentName }}" `
               -keyVaultName '${{ inputs.solution }}-Kv-${{ inputs.environmentName }}' `
               -resourceGroupName "${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
+              -rgName "${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -rgLocation "${{ env.location }}" -whatif
 
       - name: Deploy Step 3 - Harden Key Vault Network Access

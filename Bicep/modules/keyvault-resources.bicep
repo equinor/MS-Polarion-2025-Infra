@@ -8,7 +8,7 @@ param keyVaultName string
 param credentials object = {}
 
 param environment string
-param resourceGroupName string
+param rgName string
 param rgLocation string
 
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
