@@ -127,8 +127,8 @@ jobs:
 
 
             $vms = 1..5
-            $sqlServers = 1..1
-            $passPhrase = 1..1
+            # $sqlServers = 1..1
+            # $passPhrase = 1..1
             $credentialsToCreate = @{}
 
             Foreach ($vm in $vms) {

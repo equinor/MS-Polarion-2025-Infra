@@ -36,6 +36,9 @@
         "ipRules": [
           {
             "value": "136.164.1.0/24"
+          },
+          {
+            "value": "185.55.105.28/32"
           }
         ],
         "defaultAction": "Deny",
