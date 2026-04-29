@@ -133,11 +133,11 @@ jobs:
 
             Foreach ($vm in $vms) {
               $existing = @()
-              $existing = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}"
+              $existing = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}-localadmin-password"
 
               if ($null -like $existing) {
                 Write-Output "Secret does not exist, generating secret..." 
-                $credentialsToCreate.Add("${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}", $(.\GeneratePassword.ps1))
+                $credentialsToCreate.Add("${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}-localadmin-password", $(.\GeneratePassword.ps1))
               }
               else {
                 Write-Output "Secret exists, skipping recreation..."

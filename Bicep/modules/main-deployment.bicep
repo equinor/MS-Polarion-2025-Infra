@@ -62,7 +62,7 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
       osType: 'Windows'
       vmSize: vmSize
       adminUsername: 'localAdmin'
-      adminPassword: keyVault.getSecret('${toLower(vm.name)}${vmAdminPasswordSecretNameSuffix}')
+      adminPassword: keyVault.getSecret('${vmNameBase}${padLeft(string(vm.index), 2, '0')}${toUpper(environment)}${vmAdminPasswordSecretNameSuffix}')
       imageReference: {
         publisher: 'MicrosoftWindowsServer'
         offer: 'WindowsServer'
