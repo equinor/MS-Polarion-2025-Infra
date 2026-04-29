@@ -3,15 +3,15 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "environment": {
-            "value": "DEV"
+            "value": "QA"
         },
         "subnetConfig": {
             "value": {
-                "compute": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-compute-polarion-dev"
+                "compute": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-compute-polarion-qa"
             }
         },
         "keyVaultName": {
-            "value": "ms-polarion-2025-kv2-dev"
+            "value": "ms-polarion-2025-kv2-qa"
         },
         "vmAdminPasswordSecretNameSuffix": {
             "value": "-localadmin-password"
@@ -34,7 +34,7 @@
                     "hasDataDisk": true,
                     "dataDiskSizeGB": 256,
                     "dataDiskStorageType": "Premium_LRS",
-                    "privateIPAddress": "10.83.157.52"
+                    "privateIPAddress": "10.83.157.116"
                 },
                 {
                     "index": 2,
@@ -43,13 +43,13 @@
                     "hasDataDisk": false,
                     "dataDiskSizeGB": null,
                     "dataDiskStorageType": "Premium_LRS",
-                    "privateIPAddress": "10.83.157.53"
+                    "privateIPAddress": "10.83.157.117"
                 }
             ]
         },
         "tags": {
             "value": {
-                "Environment": "Development",
+                "Environment": "QA",
                 "Project": "Polarion2025",
                 "ManagedBy": "Infrastructure"
             }
