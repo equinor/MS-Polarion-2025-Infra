@@ -21,6 +21,8 @@ param storageAccountName string
 param runner string
 @description('Controls whether the GitHub runner IP is temporarily allowed in Key Vault network ACLs during bootstrap.')
 param includeRunnerAccess bool = true
+@description('Controls whether Key Vault purge protection is enabled.')
+param enablePurgeProtection bool = false
 param publicNetworkAccessLogAnalytics string = 'Disabled'
 param vmAdminPasswordSecretNameSuffix string = '-localadmin-password'
 
@@ -98,6 +100,7 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     storageAccountName: storageAccountName
     runner: runner
     includeRunnerAccess: includeRunnerAccess
+    enablePurgeProtection: enablePurgeProtection
     publicNetworkAccessLogAnalytics: publicNetworkAccessLogAnalytics
     recoveryServicesVaultRGName: recoveryServicesVaultRG.outputs.name
   }

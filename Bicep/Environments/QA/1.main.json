@@ -6,7 +6,7 @@
       "value": "S499"
     },
     "environment": {
-      "value": "DEV"
+      "value": "QA"
     },
     "keyVaultName": {
       "value": "MS-POLARION-2025-KV2"
@@ -50,9 +50,9 @@
     },
     "subnetConfig": {
       "value": {
-        "recoveryServicesVault": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-pe-rsv-polarion-dev",
-        "compute": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-compute-polarion-dev",
-        "privateEndpoints": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-pe-app-polarion-dev"
+        "recoveryServicesVault": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-pe-rsv-polarion-qa",
+        "compute": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-compute-polarion-qa",
+        "privateEndpoints": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-pe-app-polarion-qa"
       }
     },
     "skuName": {
