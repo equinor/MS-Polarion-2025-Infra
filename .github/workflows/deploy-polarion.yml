@@ -52,6 +52,7 @@ jobs:
       resourceGroupName: "MS-Polarion-2025"
       location: "NorwayEast"
       environmentType: "NONPROD"
+      solution: "MS-Polarion-2025"
   # deploy-polarion-prod:
   #   needs: [deploy-polarion-qa]
   #   name: Deploy Polarion - PROD - NorwayEast
@@ -65,3 +66,4 @@ jobs:
   #     resourceGroupName: "MS-Polarion-2025"
   #     location: "NorwayEast"
   #     environmentType: "PROD"
+  #     solution: "MS-Polarion-2025"
