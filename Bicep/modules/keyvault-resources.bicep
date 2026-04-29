@@ -20,7 +20,7 @@ module keyVaultSecrets 'br/public:avm/res/key-vault/vault/secret:0.1.0' = [
     name: 'kv-secret-${uniqueString(keyVault.id, credential.key)}'
     params: {
       keyVaultName: keyVault.name
-      name: '${credential.key}-localadmin-password'
+      name: credential.key
       value: credential.value
       enableTelemetry: false
     }
