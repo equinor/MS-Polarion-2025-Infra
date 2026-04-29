@@ -29,8 +29,9 @@
             "value": [
                 {
                     "index": 1,
+                    "vmSize": "Standard_D4s_v5",
                     "vmImageSku": "2025-datacenter-g2",
-                    "osDiskSizeGB": 512,
+                    "osDiskSizeGB": 128,
                     "hasDataDisk": true,
                     "dataDiskSizeGB": 256,
                     "dataDiskStorageType": "Premium_LRS",
@@ -38,12 +39,33 @@
                 },
                 {
                     "index": 2,
+                    "vmSize": "Standard_D4s_v5",
                     "vmImageSku": "2025-datacenter-g2",
-                    "osDiskSizeGB": 512,
-                    "hasDataDisk": false,
-                    "dataDiskSizeGB": null,
+                    "osDiskSizeGB": 128,
+                    "hasDataDisk": true,
+                    "dataDiskSizeGB": 256,
                     "dataDiskStorageType": "Premium_LRS",
                     "privateIPAddress": "10.83.157.53"
+                },
+                {
+                    "index": 3,
+                    "vmSize": "Standard_D4s_v5",
+                    "vmImageSku": "2025-datacenter-g2",
+                    "osDiskSizeGB": 128,
+                    "hasDataDisk": true,
+                    "dataDiskSizeGB": 512,
+                    "dataDiskStorageType": "Premium_LRS",
+                    "privateIPAddress": "10.83.157.54"
+                },
+                {
+                    "index": 4,
+                    "vmSize": "Standard_D4s_v5",
+                    "vmImageSku": "2025-datacenter-g2",
+                    "osDiskSizeGB": 128,
+                    "hasDataDisk": true,
+                    "dataDiskSizeGB": 256,
+                    "dataDiskStorageType": "Premium_LRS",
+                    "privateIPAddress": "10.83.157.55"
                 }
             ]
         },

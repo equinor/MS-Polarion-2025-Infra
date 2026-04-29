@@ -23,7 +23,7 @@ param vmSize string = 'Standard_D4s_v5'
 @description('Base name aligned with naming standard. Resulting names become <base><NN><Environment>, for example S499POLWS01Dev.')
 param vmNameBase string = 'S499POLWS'
 
-@description('Per-VM configuration array. Each object must contain: vmImageSku, osDiskSizeGB, hasDataDisk, dataDiskSizeGB, dataDiskStorageType, privateIPAddress.')
+@description('Per-VM configuration array. Each object should contain: vmSize, vmImageSku, osDiskSizeGB, hasDataDisk, dataDiskSizeGB, dataDiskStorageType, privateIPAddress.')
 param vmConfigurations array = []
 
 @description('Resource tags applied to all VMs and child resources.')
@@ -39,16 +39,18 @@ var vmInstances = [
   for i in range(0, vmCount): {
     index: i + 1
     name: '${toUpper(vmNameBase)}${padLeft(string(i + 1), 2, '0')}${environmentSuffix}'
-    config: length(vmConfigurations) > i
-      ? vmConfigurations[i]
-      : {
-          vmImageSku: '2025-datacenter-g2'
-          osDiskSizeGB: 512
-          hasDataDisk: false
-          dataDiskSizeGB: 256
-          dataDiskStorageType: 'Premium_LRS'
-          privateIPAddress: '10.83.157.${52 + i}'
-        }
+    config: union(
+      {
+        vmSize: vmSize
+        vmImageSku: '2025-datacenter-g2'
+        osDiskSizeGB: 512
+        hasDataDisk: false
+        dataDiskSizeGB: 256
+        dataDiskStorageType: 'Premium_LRS'
+        privateIPAddress: '10.83.157.${52 + i}'
+      },
+      length(vmConfigurations) > i ? vmConfigurations[i] : {}
+    )
   }
 ]
 
@@ -60,7 +62,7 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
       name: vm.name
       computerName: substring(vm.name, 0, min(length(vm.name), 15))
       osType: 'Windows'
-      vmSize: vmSize
+      vmSize: vm.config.vmSize
       adminUsername: 'localAdmin'
       adminPassword: keyVault.getSecret('${vmNameBase}${padLeft(string(vm.index), 2, '0')}${toUpper(environment)}${vmAdminPasswordSecretNameSuffix}')
       imageReference: {
