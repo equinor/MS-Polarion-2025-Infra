@@ -1,0 +1,58 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environment": {
+            "value": "DEV"
+        },
+        "subnetConfig": {
+            "value": {
+                "compute": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-compute-polarion-dev"
+            }
+        },
+        "keyVaultName": {
+            "value": "<your-key-vault-name>"
+        },
+        "vmAdminPasswordSecretNameSuffix": {
+            "value": "-localadmin-password"
+        },
+        "vmCount": {
+            "value": 2
+        },
+        "vmSize": {
+            "value": "Standard_D4s_v5"
+        },
+        "vmNameBase": {
+            "value": "S499PLWS25"
+        },
+        "vmConfigurations": {
+            "value": [
+                {
+                    "index": 1,
+                    "vmImageSku": "2025-datacenter-g2",
+                    "osDiskSizeGB": 512,
+                    "hasDataDisk": true,
+                    "dataDiskSizeGB": 256,
+                    "dataDiskStorageType": "Premium_LRS",
+                    "privateIPAddress": "10.83.157.49"
+                },
+                {
+                    "index": 2,
+                    "vmImageSku": "2025-datacenter-g2",
+                    "osDiskSizeGB": 512,
+                    "hasDataDisk": false,
+                    "dataDiskSizeGB": null,
+                    "dataDiskStorageType": "Premium_LRS",
+                    "privateIPAddress": "10.83.157.50"
+                }
+            ]
+        },
+        "tags": {
+            "value": {
+                "Environment": "Development",
+                "Project": "Polarion2025",
+                "ManagedBy": "Infrastructure"
+            }
+        }
+    }
+}

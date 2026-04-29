@@ -21,8 +21,8 @@ param vmSize string = 'Standard_D4s_v5'
 @description('Base name aligned with legacy naming standard. Resulting names become <base><NN>-<environment>.')
 param vmNameBase string = 'S499PLWS25'
 
-@description('Marketplace SKU for Windows Server 2025 Datacenter x64 Gen2. Validate availability in your target region.')
-param vmImageSku string = '2025-datacenter-g2'
+@description('Per-VM configuration array. Each object must contain: vmImageSku, osDiskSizeGB, hasDataDisk, dataDiskSizeGB, dataDiskStorageType, privateIPAddress.')
+param vmConfigurations array = []
 
 @description('Resource tags applied to all VMs and child resources.')
 param tags object = {}
@@ -35,6 +35,16 @@ var vmInstances = [
   for i in range(0, vmCount): {
     index: i + 1
     name: '${toUpper(vmNameBase)}${padLeft(string(i + 1), 2, '0')}-${toUpper(environment)}'
+    config: length(vmConfigurations) > i
+      ? vmConfigurations[i]
+      : {
+          vmImageSku: '2025-datacenter-g2'
+          osDiskSizeGB: 512
+          hasDataDisk: false
+          dataDiskSizeGB: 256
+          dataDiskStorageType: 'Premium_LRS'
+          privateIPAddress: '10.83.157.${49 + i}'
+        }
   }
 ]
 
@@ -52,16 +62,29 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
       imageReference: {
         publisher: 'MicrosoftWindowsServer'
         offer: 'WindowsServer'
-        sku: vmImageSku
+        sku: vm.config.vmImageSku
         version: 'latest'
       }
       osDisk: {
         caching: 'ReadWrite'
-        diskSizeGB: 512
+        diskSizeGB: vm.config.osDiskSizeGB
         managedDisk: {
           storageAccountType: 'Premium_LRS'
         }
       }
+      dataDisks: vm.config.hasDataDisk
+        ? [
+            {
+              caching: 'ReadWrite'
+              createOption: 'Empty'
+              diskSizeGB: vm.config.dataDiskSizeGB
+              lun: 0
+              managedDisk: {
+                storageAccountType: vm.config.dataDiskStorageType
+              }
+            }
+          ]
+        : []
       nicConfigurations: [
         {
           nicSuffix: '-nic-01'
@@ -69,6 +92,8 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
             {
               name: 'ipconfig01'
               subnetResourceId: subnetConfig.compute
+              privateIPAddress: vm.config.privateIPAddress
+              privateIPAllocationMethod: 'Static'
             }
           ]
         }
