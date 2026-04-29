@@ -47,7 +47,7 @@ var vmInstances = [
           hasDataDisk: false
           dataDiskSizeGB: 256
           dataDiskStorageType: 'Premium_LRS'
-          privateIPAddress: '10.83.157.${49 + i}'
+          privateIPAddress: '10.83.157.${52 + i}'
         }
   }
 ]

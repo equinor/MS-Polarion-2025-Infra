@@ -34,7 +34,7 @@
                     "hasDataDisk": true,
                     "dataDiskSizeGB": 256,
                     "dataDiskStorageType": "Premium_LRS",
-                    "privateIPAddress": "10.83.157.49"
+                    "privateIPAddress": "10.83.157.52"
                 },
                 {
                     "index": 2,
@@ -43,7 +43,7 @@
                     "hasDataDisk": false,
                     "dataDiskSizeGB": null,
                     "dataDiskStorageType": "Premium_LRS",
-                    "privateIPAddress": "10.83.157.50"
+                    "privateIPAddress": "10.83.157.53"
                 }
             ]
         },
