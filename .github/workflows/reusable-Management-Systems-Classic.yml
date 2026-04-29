@@ -133,7 +133,7 @@ jobs:
 
             Foreach ($vm in $vms) {
               $existing = @()
-              $existing = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}-localadmin-password"
+              $existing = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}-localadmin-password"
 
               if ($null -like $existing) {
                 Write-Output "Secret does not exist, generating secret..." 
@@ -146,7 +146,7 @@ jobs:
 
             Foreach ($sqlserver in $sqlServers) {
               $sqexisting = @()
-              $sqexisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $sqlserver)${{ inputs.environmentName }}"
+              $sqexisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $sqlserver)${{ inputs.environmentName }}"
 
               if ($null -like $sqexisting) {
                 Write-Output "Secret does not exist, generating secret..." 
@@ -159,7 +159,7 @@ jobs:
 
             Foreach ($p in $passPhrase) {
               $passExisting = @()
-              $passExisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $p)${{ inputs.environmentName }}-passPhrase"
+              $passExisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $p)${{ inputs.environmentName }}-passPhrase"
 
               if ($null -like $passExisting) {
                 Write-Output "Secret does not exist, generating secret..." 
@@ -191,7 +191,7 @@ jobs:
               -TemplateFile ".\Bicep\modules\main-deployment.bicep" `
               -TemplateParameterFile ".\Bicep\Environments\${{inputs.environmentName}}\2.main-deployment.json" `
               -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
-              -KeyVaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" `
+              -KeyVaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" `
               -environment "${{inputs.environmentName}}" # -whatif
             Write-Output "Time end VM deployment: $(get-date)"
 
