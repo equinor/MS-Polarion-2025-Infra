@@ -181,7 +181,21 @@ jobs:
               -rgName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -rgLocation "${{ env.location }}" # -whatif
 
-      - name: Deploy Step 3 - Harden Key Vault Network Access
+      - name: Deploy Step 3 - Deploy Virtual Machines
+        uses: azure/powershell@v3
+        with:
+          azPSVersion: "latest"
+          inlineScript: |
+            Write-Output "Time start VM deployment: $(get-date)"
+            New-AzResourceGroupDeployment -Name "Step-3-VMs-${{ github.actor }}-$(get-date -format 'yyyy.MM.dd')" `
+              -TemplateFile ".\Bicep\modules\main-deployment.bicep" `
+              -TemplateParameterFile ".\Bicep\Environments\${{inputs.environmentName}}\2.main-deployment.json" `
+              -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
+              -KeyVaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" `
+              -environment "${{inputs.environmentName}}" # -whatif
+            Write-Output "Time end VM deployment: $(get-date)"
+
+      - name: Deploy Step 4 - Harden Key Vault Network Access
         uses: azure/powershell@v3
         with:
           azPSVersion: "latest"
@@ -203,17 +217,3 @@ jobs:
                 -runner $runner `
                 -includeRunnerAccess $false # -whatif
             Write-Output "Time end hardening deployment: $(get-date)"
-
-      - name: Deploy Step 4 - Deploy Virtual Machines
-        uses: azure/powershell@v3
-        with:
-          azPSVersion: "latest"
-          inlineScript: |
-            Write-Output "Time start VM deployment: $(get-date)"
-            New-AzResourceGroupDeployment -Name "Step-4-VMs-${{ github.actor }}-$(get-date -format 'yyyy.MM.dd')" `
-              -TemplateFile ".\Bicep\modules\main-deployment.bicep" `
-              -TemplateParameterFile ".\Bicep\Environments\${{inputs.environmentName}}\2.main-deployment.json" `
-              -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
-              -KeyVaultName "${{ inputs.solution }}-Kv-${{ inputs.environmentName }}" `
-              -environment "${{inputs.environmentName}}" # -whatif
-            Write-Output "Time end VM deployment: $(get-date)"
