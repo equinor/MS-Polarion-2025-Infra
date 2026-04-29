@@ -176,7 +176,7 @@ jobs:
               -TemplateFile .\Bicep\modules\keyvault-resources.bicep `
               -credentials $CredentialsToCreate `
               -environment "${{ inputs.environmentName }}" `
-              -keyVaultName '${{ inputs.solution }}-Kv-${{ inputs.environmentName }}' `
+              -keyVaultName '${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}' `
               -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -rgName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -rgLocation "${{ env.location }}" # -whatif
