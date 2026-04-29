@@ -12,7 +12,7 @@ param keyVaultName string
 @description('Suffix appended to each VM name to resolve the admin password secret. Secret name format: <vmName><suffix>.')
 param vmAdminPasswordSecretNameSuffix string = '-localadmin-password'
 
-@description('Number of VMs to deploy.')
+@description('Fallback number of VMs to deploy when vmConfigurations is empty.')
 @minValue(1)
 @maxValue(99)
 param vmCount int = 4
@@ -34,9 +34,10 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
 }
 
 var environmentSuffix = '${toUpper(substring(environment, 0, 1))}${toLower(substring(environment, 1))}'
+var effectiveVmCount = length(vmConfigurations) > 0 ? length(vmConfigurations) : vmCount
 
 var vmInstances = [
-  for i in range(0, vmCount): {
+  for i in range(0, effectiveVmCount): {
     index: i + 1
     name: '${toUpper(vmNameBase)}${padLeft(string(i + 1), 2, '0')}${environmentSuffix}'
     config: union(
