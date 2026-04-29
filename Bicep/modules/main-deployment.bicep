@@ -13,13 +13,15 @@ param keyVaultName string
 param vmAdminPasswordSecretNameSuffix string = '-localadmin-password'
 
 @description('Number of VMs to deploy.')
+@minValue(1)
+@maxValue(99)
 param vmCount int = 4
 
 @description('Virtual machine size.')
 param vmSize string = 'Standard_D4s_v5'
 
-@description('Base name aligned with legacy naming standard. Resulting names become <base><NN>-<environment>.')
-param vmNameBase string = 'S499PLWS25'
+@description('Base name aligned with naming standard. Resulting names become <base><NN><Environment>, for example S499POLWS01Dev.')
+param vmNameBase string = 'S499POLWS'
 
 @description('Per-VM configuration array. Each object must contain: vmImageSku, osDiskSizeGB, hasDataDisk, dataDiskSizeGB, dataDiskStorageType, privateIPAddress.')
 param vmConfigurations array = []
@@ -31,10 +33,12 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: keyVaultName
 }
 
+var environmentSuffix = '${toUpper(substring(environment, 0, 1))}${toLower(substring(environment, 1))}'
+
 var vmInstances = [
   for i in range(0, vmCount): {
     index: i + 1
-    name: '${toUpper(vmNameBase)}${padLeft(string(i + 1), 2, '0')}-${toUpper(environment)}'
+    name: '${toUpper(vmNameBase)}${padLeft(string(i + 1), 2, '0')}${environmentSuffix}'
     config: length(vmConfigurations) > i
       ? vmConfigurations[i]
       : {

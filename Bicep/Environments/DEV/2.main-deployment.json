@@ -11,7 +11,7 @@
             }
         },
         "keyVaultName": {
-            "value": "<your-key-vault-name>"
+            "value": "ms-polarion-2025-kv-dev"
         },
         "vmAdminPasswordSecretNameSuffix": {
             "value": "-localadmin-password"
@@ -23,7 +23,7 @@
             "value": "Standard_D4s_v5"
         },
         "vmNameBase": {
-            "value": "S499PLWS25"
+            "value": "S499POLWS"
         },
         "vmConfigurations": {
             "value": [
