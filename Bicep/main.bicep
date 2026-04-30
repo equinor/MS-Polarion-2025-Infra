@@ -25,8 +25,8 @@ param includeRunnerAccess bool = true
 param enablePurgeProtection bool = false
 param publicNetworkAccessLogAnalytics string = 'Disabled'
 param vmAdminPasswordSecretNameSuffix string = '-localadmin-password'
-@description('Private IP addresses for VMs that should receive NSG deny rules on port 3398.')
-param vmPrivateIpAddresses array = []
+@description('Per-VM configuration array used by VM deployment. Each object should contain privateIPAddress.')
+param vmConfigurations array = []
 
 @secure()
 @description('Initial Key Vault secrets to seed on first deployment. Object format: { "secret-name": "secret-value" }.')
@@ -51,6 +51,8 @@ param initialKeyVaultSecrets object = {}
 ])
 param environment string
 param tags object
+
+var vmPrivateIpAddresses = [for vm in vmConfigurations: vm.privateIPAddress]
 
 @description('Please enter tags to identify your resources, cost allocation unit, contact person, solution etc as shown below.')
 param deploymentTags object = {
