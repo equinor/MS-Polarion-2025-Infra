@@ -40,6 +40,8 @@ param skuName string
 param storageAccountName string
 @description('Private IP addresses for VMs that should receive inbound deny rules on port 3389. Leave empty to deploy an NSG without custom rules.')
 param vmPrivateIpAddresses array = []
+@description('VM backup targets used to associate virtual machines to the VMPolicyEnhanced backup policy.')
+param vmBackupItems array = []
 @description('Controls whether the GitHub runner IP is appended to Key Vault IP rules.')
 param includeRunnerAccess bool = true
 
@@ -247,6 +249,16 @@ var backupPolicies = [
   }
 ]
 
+var recoveryServicesProtectedItems = [
+  for vm in vmBackupItems: {
+    name: 'VM;iaasvmcontainerv2;${resourceGroupName};${vm.vmName}'
+    policyName: 'VMPolicyEnhanced'
+    protectedItemType: 'Microsoft.Compute/virtualMachines'
+    protectionContainerName: 'IaasVMContainer;iaasvmcontainerv2;${resourceGroupName};${vm.vmName}'
+    sourceResourceId: vm.sourceResourceId
+  }
+]
+
 module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' = {
   name: '${solution}-rsv-${environment}'
   params: {
@@ -261,6 +273,7 @@ module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' 
     ]
     immutabilitySettingState: 'Unlocked'
     backupPolicies: backupPolicies
+    protectedItems: recoveryServicesProtectedItems
     softDeleteSettings: {
       softDeleteRetentionPeriodInDays: softDeleteRetentionInDays
       softDeleteState: 'Disabled'
