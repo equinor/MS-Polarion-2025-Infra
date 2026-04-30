@@ -152,6 +152,20 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.32.0' = {
 var nsgSecurityRules = length(vmPrivateIpAddresses) > 0
   ? [
       {
+        name: 'Allow-RDP-3398-VirtualNetwork-All-VMs'
+        properties: {
+          description: 'Allow inbound TCP 3398 traffic from VirtualNetwork to all configured VM private IPs'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '3398'
+          sourceAddressPrefix: 'VirtualNetwork'
+          destinationAddressPrefixes: vmPrivateIpAddresses
+          access: 'Allow'
+          priority: 2990
+          direction: 'Inbound'
+        }
+      }
+      {
         name: 'Deny-RDP-3398-All-VMs'
         properties: {
           description: 'Deny inbound TCP 3398 traffic to all configured VM private IPs'
