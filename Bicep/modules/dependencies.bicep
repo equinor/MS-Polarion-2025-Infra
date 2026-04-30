@@ -254,6 +254,11 @@ module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' 
     name: '${toLower(solution)}-rsv-${toLower(environment)}'
     tags: union(deploymentTags, tags)
     publicNetworkAccess: publicNetworkAccess
+    privateEndpoints: [
+      {
+        subnetResourceId: subnetConfig.recoveryServicesVault
+      }
+    ]
     immutabilitySettingState: 'Unlocked'
     backupPolicies: backupPolicies
     softDeleteSettings: {
