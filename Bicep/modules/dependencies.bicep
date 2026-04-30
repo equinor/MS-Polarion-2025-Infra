@@ -38,7 +38,7 @@ param publicNetworkAccessLogAnalytics string
 param solution string
 param skuName string
 param storageAccountName string
-@description('Private IP addresses for VMs that should receive inbound deny rules on port 3398. Leave empty to deploy an NSG without custom rules.')
+@description('Private IP addresses for VMs that should receive inbound deny rules on port 3389. Leave empty to deploy an NSG without custom rules.')
 param vmPrivateIpAddresses array = []
 @description('Controls whether the GitHub runner IP is appended to Key Vault IP rules.')
 param includeRunnerAccess bool = true
@@ -149,15 +149,35 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.32.0' = {
   scope: resourceGroup(newRG.name)
 }
 
-var nsgSecurityRules = length(vmPrivateIpAddresses) > 0
+var nsgBaseSecurityRules = [
+  {
+    name: 'Allow-LDAP-Kerberos-Any-Any'
+    properties: {
+      description: 'Allow inbound TCP 88 (Kerberos) and 389 (LDAP) from Any to Any'
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRanges: [
+        '88'
+        '389'
+      ]
+      sourceAddressPrefix: '*'
+      destinationAddressPrefix: '*'
+      access: 'Allow'
+      priority: 2890
+      direction: 'Inbound'
+    }
+  }
+]
+
+var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
   ? [
       {
-        name: 'Allow-RDP-3398-VirtualNetwork-All-VMs'
+        name: 'Allow-RDP-3389-VirtualNetwork-All-VMs'
         properties: {
-          description: 'Allow inbound TCP 3398 traffic from VirtualNetwork to all configured VM private IPs'
+          description: 'Allow inbound TCP 3389 traffic from VirtualNetwork to all configured VM private IPs'
           protocol: 'Tcp'
           sourcePortRange: '*'
-          destinationPortRange: '3398'
+          destinationPortRange: '3389'
           sourceAddressPrefix: 'VirtualNetwork'
           destinationAddressPrefixes: vmPrivateIpAddresses
           access: 'Allow'
@@ -166,12 +186,12 @@ var nsgSecurityRules = length(vmPrivateIpAddresses) > 0
         }
       }
       {
-        name: 'Deny-RDP-3398-All-VMs'
+        name: 'Deny-RDP-3389-All-VMs'
         properties: {
-          description: 'Deny inbound TCP 3398 traffic to all configured VM private IPs'
+          description: 'Deny inbound TCP 3389 traffic to all configured VM private IPs'
           protocol: 'Tcp'
           sourcePortRange: '*'
-          destinationPortRange: '3398'
+          destinationPortRange: '3389'
           sourceAddressPrefix: '*'
           destinationAddressPrefixes: vmPrivateIpAddresses
           access: 'Deny'
@@ -181,6 +201,8 @@ var nsgSecurityRules = length(vmPrivateIpAddresses) > 0
       }
     ]
   : []
+
+var nsgSecurityRules = concat(nsgBaseSecurityRules, nsgRdpSecurityRules)
 
 module networkSecurityGroup 'br/public:avm/res/network/network-security-group:0.4.0' = {
   name: '${solution}-nsg-${environment}'
