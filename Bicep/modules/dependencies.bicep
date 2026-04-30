@@ -271,3 +271,16 @@ module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' 
   dependsOn: []
   scope: resourceGroup(recoveryServicesVaultRG.name)
 }
+
+module recoveryServicesVaultNetworkSecurityGroup 'br/public:avm/res/network/network-security-group:0.4.0' = {
+  name: '${solution}-rsv-nsg-${environment}'
+  params: {
+    location: rgLocation
+    name: '${toLower(solution)}-rsv-nsg-${toLower(environment)}'
+    tags: union(deploymentTags, tags)
+  }
+  scope: resourceGroup(recoveryServicesVaultRG.name)
+}
+
+output recoveryServicesVaultNetworkSecurityGroupName string = recoveryServicesVaultNetworkSecurityGroup.outputs.name
+output recoveryServicesVaultNetworkSecurityGroupId string = recoveryServicesVaultNetworkSecurityGroup.outputs.resourceId
