@@ -167,6 +167,24 @@ var nsgBaseSecurityRules = [
       direction: 'Inbound'
     }
   }
+  {
+    name: 'Allow-443-6516-5433-VirtualNetwork'
+    properties: {
+      description: 'Allow inbound TCP 443, 6516, and 5433 from VirtualNetwork to VirtualNetwork'
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRanges: [
+        '443'
+        '6516'
+        '5433'
+      ]
+      sourceAddressPrefix: 'VirtualNetwork'
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 2891
+      direction: 'Inbound'
+    }
+  }
 ]
 
 var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
