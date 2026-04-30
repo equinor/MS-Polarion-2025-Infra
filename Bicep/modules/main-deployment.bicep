@@ -112,3 +112,4 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
 
 output deployedVmNames array = [for vm in vmInstances: vm.name]
 output deployedVmIds array = [for (vm, i) in vmInstances: windowsVm[i].outputs.resourceId]
+output deployedVmPrivateIpAddresses array = [for vm in vmInstances: vm.config.privateIPAddress]
