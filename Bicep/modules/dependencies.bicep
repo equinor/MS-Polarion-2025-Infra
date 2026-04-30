@@ -150,6 +150,14 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.32.0' = {
 // param enableSoftDelete bool = false
 // param softDeleteRetentionInDays int = 7
 
+var backupPoliciesRaw = loadJsonContent('../CommonFiles/backupPolicies.json')
+var backupPolicies = [
+  for policy in backupPoliciesRaw: {
+    name: policy.name
+    properties: policy.properties
+  }
+]
+
 module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' = {
   name: '${solution}-rsv-${environment}'
   params: {
@@ -158,6 +166,7 @@ module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' 
     tags: union(deploymentTags, tags)
     publicNetworkAccess: publicNetworkAccess
     immutabilitySettingState: 'Unlocked'
+    backupPolicies: backupPolicies
     softDeleteSettings: {
       softDeleteRetentionPeriodInDays: softDeleteRetentionInDays
       softDeleteState: 'Disabled'
