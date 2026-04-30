@@ -25,6 +25,8 @@ param includeRunnerAccess bool = true
 param enablePurgeProtection bool = false
 param publicNetworkAccessLogAnalytics string = 'Disabled'
 param vmAdminPasswordSecretNameSuffix string = '-localadmin-password'
+@description('Private IP addresses for VMs that should receive NSG deny rules on port 3398.')
+param vmPrivateIpAddresses array = []
 
 @secure()
 @description('Initial Key Vault secrets to seed on first deployment. Object format: { "secret-name": "secret-value" }.')
@@ -98,6 +100,7 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     solution: solution
     skuName: skuName
     storageAccountName: storageAccountName
+    vmPrivateIpAddresses: vmPrivateIpAddresses
     runner: runner
     includeRunnerAccess: includeRunnerAccess
     enablePurgeProtection: enablePurgeProtection

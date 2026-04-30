@@ -38,6 +38,8 @@ param publicNetworkAccessLogAnalytics string
 param solution string
 param skuName string
 param storageAccountName string
+@description('Private IP addresses for VMs that should receive inbound deny rules on port 3398. Leave empty to deploy an NSG without custom rules.')
+param vmPrivateIpAddresses array = []
 @description('Controls whether the GitHub runner IP is appended to Key Vault IP rules.')
 param includeRunnerAccess bool = true
 
@@ -146,6 +148,37 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.32.0' = {
   dependsOn: []
   scope: resourceGroup(newRG.name)
 }
+
+var nsgSecurityRules = [
+  for (vmPrivateIp, index) in vmPrivateIpAddresses: {
+    name: 'Deny-RDP-3398-${index + 1}'
+    properties: {
+      description: 'Deny inbound TCP 3398 traffic to VM private IP ${vmPrivateIp}'
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRange: '3398'
+      sourceAddressPrefix: '*'
+      destinationAddressPrefix: vmPrivateIp
+      access: 'Deny'
+      priority: 3000 + index
+      direction: 'Inbound'
+    }
+  }
+]
+
+module networkSecurityGroup 'br/public:avm/res/network/network-security-group:0.4.0' = {
+  name: '${solution}-nsg-${environment}'
+  params: {
+    location: rgLocation
+    name: '${toLower(solution)}-nsg-${toLower(environment)}'
+    tags: union(deploymentTags, tags)
+    securityRules: nsgSecurityRules
+  }
+  scope: resourceGroup(newRG.name)
+}
+
+output networkSecurityGroupName string = networkSecurityGroup.outputs.name
+output networkSecurityGroupId string = networkSecurityGroup.outputs.resourceId
 
 // param enableSoftDelete bool = false
 // param softDeleteRetentionInDays int = 7
