@@ -55,12 +55,48 @@
         "privateEndpoints": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-pe-app-polarion-qa"
       }
     },
-    "vmPrivateIpAddresses": {
+    "vmConfigurations": {
       "value": [
-        "10.83.157.116",
-        "10.83.157.117",
-        "10.83.157.118",
-        "10.83.157.119"
+        {
+          "index": 1,
+          "vmSize": "Standard_D4s_v5",
+          "vmImageSku": "2025-datacenter-g2",
+          "osDiskSizeGB": 128,
+          "hasDataDisk": true,
+          "dataDiskSizeGB": 256,
+          "dataDiskStorageType": "Premium_LRS",
+          "privateIPAddress": "10.83.157.116"
+        },
+        {
+          "index": 2,
+          "vmSize": "Standard_D4s_v5",
+          "vmImageSku": "2025-datacenter-g2",
+          "osDiskSizeGB": 128,
+          "hasDataDisk": true,
+          "dataDiskSizeGB": 256,
+          "dataDiskStorageType": "Premium_LRS",
+          "privateIPAddress": "10.83.157.117"
+        },
+        {
+          "index": 3,
+          "vmSize": "Standard_D4s_v5",
+          "vmImageSku": "2025-datacenter-g2",
+          "osDiskSizeGB": 128,
+          "hasDataDisk": true,
+          "dataDiskSizeGB": 512,
+          "dataDiskStorageType": "Premium_LRS",
+          "privateIPAddress": "10.83.157.118"
+        },
+        {
+          "index": 4,
+          "vmSize": "Standard_D4s_v5",
+          "vmImageSku": "2025-datacenter-g2",
+          "osDiskSizeGB": 128,
+          "hasDataDisk": true,
+          "dataDiskSizeGB": 256,
+          "dataDiskStorageType": "Premium_LRS",
+          "privateIPAddress": "10.83.157.119"
+        }
       ]
     },
     "skuName": {

@@ -149,22 +149,24 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.32.0' = {
   scope: resourceGroup(newRG.name)
 }
 
-var nsgSecurityRules = [
-  for (vmPrivateIp, index) in vmPrivateIpAddresses: {
-    name: 'Deny-RDP-3398-${index + 1}'
-    properties: {
-      description: 'Deny inbound TCP 3398 traffic to VM private IP ${vmPrivateIp}'
-      protocol: 'Tcp'
-      sourcePortRange: '*'
-      destinationPortRange: '3398'
-      sourceAddressPrefix: '*'
-      destinationAddressPrefix: vmPrivateIp
-      access: 'Deny'
-      priority: 3000 + index
-      direction: 'Inbound'
-    }
-  }
-]
+var nsgSecurityRules = length(vmPrivateIpAddresses) > 0
+  ? [
+      {
+        name: 'Deny-RDP-3398-All-VMs'
+        properties: {
+          description: 'Deny inbound TCP 3398 traffic to all configured VM private IPs'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '3398'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefixes: vmPrivateIpAddresses
+          access: 'Deny'
+          priority: 3000
+          direction: 'Inbound'
+        }
+      }
+    ]
+  : []
 
 module networkSecurityGroup 'br/public:avm/res/network/network-security-group:0.4.0' = {
   name: '${solution}-nsg-${environment}'
