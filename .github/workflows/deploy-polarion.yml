@@ -38,21 +38,21 @@ jobs:
       location: "NorwayEast"
       environmentType: "NONPROD"
       solution: "MS-Polarion-2025"
+  # deploy-polarion-qa:
+  #   needs: [ deploy-polarion-dev ]
+  #   name: Deploy Polarion - QA - NorwayEast
+  #   uses: ./.github/workflows/reusable-Management-Systems-Classic.yml
+  #   secrets: inherit
+  #   permissions:
+  #     contents: read # Required to checkout the repository
+  #     id-token: write # Required to login to Azure using OIDC
+  #   with:
+  #     environmentName: "QA"
+  #     resourceGroupName: "MS-Polarion-2025"
+  #     location: "NorwayEast"
+  #     environmentType: "NONPROD"
+  #     solution: "MS-Polarion-2025"
 
-  deploy-polarion-qa:
-    needs: [ deploy-polarion-dev ]
-    name: Deploy Polarion - QA - NorwayEast
-    uses: ./.github/workflows/reusable-Management-Systems-Classic.yml
-    secrets: inherit
-    permissions:
-      contents: read # Required to checkout the repository
-      id-token: write # Required to login to Azure using OIDC
-    with:
-      environmentName: "QA"
-      resourceGroupName: "MS-Polarion-2025"
-      location: "NorwayEast"
-      environmentType: "NONPROD"
-      solution: "MS-Polarion-2025"
   # deploy-polarion-prod:
   #   needs: [deploy-polarion-qa]
   #   name: Deploy Polarion - PROD - NorwayEast
