@@ -25,6 +25,15 @@
         "vmNameBase": {
             "value": "S499POLWS"
         },
+        "enableWindowsAdminCenterExtension": {
+            "value": true
+        },
+        "windowsAdminCenterExtensionSettings": {
+            "value": {
+                "port": "6516",
+                "salt": ""
+            }
+        },
         "vmConfigurations": {
             "value": [
                 {
