@@ -29,6 +29,15 @@ param vmConfigurations array = []
 @description('Resource tags applied to all VMs and child resources.')
 param tags object = {}
 
+@description('Controls whether the Windows Admin Center VM extension is deployed on each VM.')
+param enableWindowsAdminCenterExtension bool = true
+
+@description('Settings passed to the Windows Admin Center extension.')
+param windowsAdminCenterExtensionSettings object = {
+  port: '6516'
+  salt: ''
+}
+
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: keyVaultName
 }
@@ -107,6 +116,24 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
       ]
       tags: tags
     }
+  }
+]
+
+resource windowsAdminCenterExtension 'Microsoft.Compute/virtualMachines/extensions@2023-09-01' = [
+  for (vm, i) in vmInstances: if (enableWindowsAdminCenterExtension) {
+    name: '${vm.name}/AdminCenter'
+    location: resourceGroup().location
+    properties: {
+      publisher: 'Microsoft.AdminCenter'
+      type: 'AdminCenter'
+      typeHandlerVersion: '0.0'
+      autoUpgradeMinorVersion: true
+      enableAutomaticUpgrade: true
+      settings: windowsAdminCenterExtensionSettings
+    }
+    dependsOn: [
+      windowsVm[i]
+    ]
   }
 ]
 
