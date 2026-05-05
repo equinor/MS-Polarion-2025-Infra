@@ -288,7 +288,7 @@ module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' 
         subnetResourceId: subnetConfig.recoveryServicesVault
       }
     ]
-    immutabilitySettingState: 'Unlocked'
+    immutabilitySettingState: 'Disabled'
     backupPolicies: backupPolicies
     protectedItems: recoveryServicesProtectedItems
     softDeleteSettings: {
