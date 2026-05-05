@@ -233,8 +233,8 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
             '80'
             '443'
           ]
-          sourceAddressPrefix: '*'
-          destinationAddressPrefixes: '*'
+          sourceAddressPrefixes: vmPrivateIpAddresses
+          destinationAddressPrefix: 'Internet'
           access: 'Allow'
           priority: 3000
           direction: 'Outbound'
