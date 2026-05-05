@@ -38,6 +38,10 @@ param publicNetworkAccessLogAnalytics string
 param solution string
 param skuName string
 param storageAccountName string
+@description('Resource group containing a shared NSG that should receive Polarion security rules.')
+param sharedNetworkResourceGroupName string = 'S499-NOE-Network'
+@description('Shared NSG name that should receive Polarion security rules.')
+param sharedNetworkSecurityGroupName string = 'S499-NOE-snet-compute-polarion-dev-nsg'
 @description('Private IP addresses for VMs that should receive inbound deny rules on port 3389. Leave empty to deploy an NSG without custom rules.')
 param vmPrivateIpAddresses array = []
 @description('VM backup targets used to associate virtual machines to the VMPolicyEnhanced backup policy.')
@@ -240,6 +244,20 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
   : []
 
 var nsgSecurityRules = concat(nsgBaseSecurityRules, nsgRdpSecurityRules)
+
+resource sharedNetworkRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
+  name: sharedNetworkResourceGroupName
+  scope: subscription()
+}
+
+module sharedNetworkSecurityGroupRules 'shared-nsg-security-rules.bicep' = {
+  name: '${solution}-shared-nsg-rules-${environment}'
+  params: {
+    networkSecurityGroupName: sharedNetworkSecurityGroupName
+    securityRules: nsgSecurityRules
+  }
+  scope: resourceGroup(sharedNetworkRG.name)
+}
 
 module networkSecurityGroup 'br/public:avm/res/network/network-security-group:0.4.0' = {
   name: '${solution}-nsg-${environment}'
