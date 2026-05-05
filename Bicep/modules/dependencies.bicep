@@ -39,9 +39,9 @@ param solution string
 param skuName string
 param storageAccountName string
 @description('Resource group containing a shared NSG that should receive Polarion security rules.')
-param sharedNetworkResourceGroupName string = 'S499-NOE-Network'
+param sharedNetworkResourceGroupName string
 @description('Shared NSG name that should receive Polarion security rules.')
-param sharedNetworkSecurityGroupName string = 'S499-NOE-snet-compute-polarion-dev-nsg'
+param sharedNetworkSecurityGroupName string
 @description('Private IP addresses for VMs that should receive inbound deny rules on port 3389. Leave empty to deploy an NSG without custom rules.')
 param vmPrivateIpAddresses array = []
 @description('VM backup targets used to associate virtual machines to the VMPolicyEnhanced backup policy.')

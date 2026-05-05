@@ -18,6 +18,10 @@ param networkAccessPolicies object
 param subnetConfig object
 param skuName string
 param storageAccountName string
+@description('Resource group containing the shared NSG to update with environment-specific rules.')
+param sharedNetworkResourceGroupName string
+@description('Shared NSG name to update with environment-specific rules.')
+param sharedNetworkSecurityGroupName string
 param runner string
 @description('Controls whether the GitHub runner IP is temporarily allowed in Key Vault network ACLs during bootstrap.')
 param includeRunnerAccess bool = true
@@ -111,6 +115,8 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     solution: solution
     skuName: skuName
     storageAccountName: storageAccountName
+    sharedNetworkResourceGroupName: sharedNetworkResourceGroupName
+    sharedNetworkSecurityGroupName: sharedNetworkSecurityGroupName
     vmPrivateIpAddresses: vmPrivateIpAddresses
     vmBackupItems: vmBackupItems
     runner: runner
