@@ -105,6 +105,12 @@
     "storageAccountName": {
       "value": "stmspolarion2025"
     },
+    "sharedNetworkResourceGroupName": {
+      "value": "S499-NOE-Network"
+    },
+    "sharedNetworkSecurityGroupName": {
+      "value": "S499-NOE-snet-compute-polarion-dev-nsg"
+    },
     "tags": {
       "value": {
         "Solution": "MS-POLARION-2025",
