@@ -228,13 +228,13 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
         properties: {
           description: 'Allow outbound TCP 80 and 443 traffic to the internet'
           protocol: 'Tcp'
-          sourcePortRanges: vmPrivateIpAddresses
+          sourcePortRange: '*'
           destinationPortRanges: [
             '80'
             '443'
           ]
-          sourceAddressPrefix: '*'
-          destinationAddressPrefixes: '*'
+          sourceAddressPrefixes: vmPrivateIpAddresses
+          destinationAddressPrefix: 'Internet'
           access: 'Allow'
           priority: 3000
           direction: 'Outbound'
