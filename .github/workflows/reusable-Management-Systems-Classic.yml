@@ -126,7 +126,7 @@ jobs:
             Write-Output "Runner: $runner2"
 
 
-            $vms = 1..5
+            $vms = 1..4
             # $sqlServers = 1..1
             # $passPhrase = 1..1
             $credentialsToCreate = @{}
