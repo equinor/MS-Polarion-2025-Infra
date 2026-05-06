@@ -25,6 +25,18 @@
         "vmNameBase": {
             "value": "S499POLWS"
         },
+        "solution": {
+            "value": "MS-POLARION-2025"
+        },
+        "sharedNetworkResourceGroupName": {
+            "value": "S499-NOE-Network"
+        },
+        "sharedNetworkSecurityGroupName": {
+            "value": "S499-NOE-snet-compute-polarion-qa"
+        },
+        "recoveryServicesVaultRGName": {
+            "value": "S499-MS-POLARION-2025-QA-RSV"
+        },
         "enableWindowsAdminCenterExtension": {
             "value": true
         },

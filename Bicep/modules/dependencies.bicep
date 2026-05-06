@@ -38,14 +38,6 @@ param publicNetworkAccessLogAnalytics string
 param solution string
 param skuName string
 param storageAccountName string
-@description('Resource group containing a shared NSG that should receive Polarion security rules.')
-param sharedNetworkResourceGroupName string
-@description('Shared NSG name that should receive Polarion security rules.')
-param sharedNetworkSecurityGroupName string
-@description('Private IP addresses for VMs that should receive inbound deny rules on port 3389. Leave empty to deploy an NSG without custom rules.')
-param vmPrivateIpAddresses array = []
-@description('VM backup targets used to associate virtual machines to the VMPolicyEnhanced backup policy.')
-param vmBackupItems array = []
 @description('Controls whether the GitHub runner IP is appended to Key Vault IP rules.')
 param includeRunnerAccess bool = true
 
@@ -155,124 +147,6 @@ module storageAccount 'br/public:avm/res/storage/storage-account:0.32.0' = {
   scope: resourceGroup(newRG.name)
 }
 
-var nsgBaseSecurityRules = [
-  {
-    name: 'Allow-LDAP-Kerberos-Any-Any'
-    properties: {
-      description: 'Allow inbound TCP 88 (Kerberos) and 389 (LDAP) from Any to Any'
-      protocol: 'Tcp'
-      sourcePortRange: '*'
-      destinationPortRanges: [
-        '88'
-        '389'
-      ]
-      sourceAddressPrefix: '*'
-      destinationAddressPrefix: '*'
-      access: 'Allow'
-      priority: 2890
-      direction: 'Inbound'
-    }
-  }
-  {
-    name: 'Allow-443-6516-5433-VirtualNetwork'
-    properties: {
-      description: 'Allow inbound TCP 443, 6516, and 5433 from VirtualNetwork to VirtualNetwork'
-      protocol: 'Tcp'
-      sourcePortRange: '*'
-      destinationPortRanges: [
-        '443'
-        '6516'
-        '5433'
-      ]
-      sourceAddressPrefix: 'VirtualNetwork'
-      destinationAddressPrefix: 'VirtualNetwork'
-      access: 'Allow'
-      priority: 2891
-      direction: 'Inbound'
-    }
-  }
-]
-
-var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
-  ? [
-      {
-        name: 'Allow-RDP-3389-VirtualNetwork-All-VMs'
-        properties: {
-          description: 'Allow inbound TCP 3389 traffic from VirtualNetwork to all configured VM private IPs'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '3389'
-          sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefixes: vmPrivateIpAddresses
-          access: 'Allow'
-          priority: 2990
-          direction: 'Inbound'
-        }
-      }
-      {
-        name: 'Deny-RDP-3389-All-VMs'
-        properties: {
-          description: 'Deny inbound TCP 3389 traffic to all configured VM private IPs'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRange: '3389'
-          sourceAddressPrefix: '*'
-          destinationAddressPrefixes: vmPrivateIpAddresses
-          access: 'Deny'
-          priority: 3000
-          direction: 'Inbound'
-        }
-      }
-      {
-        name: 'Allow_Web_Outbound'
-        properties: {
-          description: 'Allow outbound TCP 80 and 443 traffic to the internet'
-          protocol: 'Tcp'
-          sourcePortRange: '*'
-          destinationPortRanges: [
-            '80'
-            '443'
-          ]
-          sourceAddressPrefixes: vmPrivateIpAddresses
-          destinationAddressPrefix: 'Internet'
-          access: 'Allow'
-          priority: 3001
-          direction: 'Outbound'
-        }
-      }
-    ]
-  : []
-
-var nsgSecurityRules = concat(nsgBaseSecurityRules, nsgRdpSecurityRules)
-
-resource sharedNetworkRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
-  name: sharedNetworkResourceGroupName
-  scope: subscription()
-}
-
-module sharedNetworkSecurityGroupRules 'shared-nsg-security-rules.bicep' = {
-  name: '${solution}-shared-nsg-rules-${environment}'
-  params: {
-    networkSecurityGroupName: sharedNetworkSecurityGroupName
-    securityRules: nsgSecurityRules
-  }
-  scope: resourceGroup(sharedNetworkRG.name)
-}
-
-module networkSecurityGroup 'br/public:avm/res/network/network-security-group:0.4.0' = {
-  name: '${solution}-nsg-${environment}'
-  params: {
-    location: rgLocation
-    name: '${toLower(solution)}-nsg-${toLower(environment)}'
-    tags: union(deploymentTags, tags)
-    securityRules: nsgSecurityRules
-  }
-  scope: resourceGroup(newRG.name)
-}
-
-output networkSecurityGroupName string = networkSecurityGroup.outputs.name
-output networkSecurityGroupId string = networkSecurityGroup.outputs.resourceId
-
 // param enableSoftDelete bool = false
 // param softDeleteRetentionInDays int = 7
 
@@ -281,16 +155,6 @@ var backupPolicies = [
   for policy in backupPoliciesRaw: {
     name: policy.name
     properties: policy.properties
-  }
-]
-
-var recoveryServicesProtectedItems = [
-  for vm in vmBackupItems: {
-    name: 'VM;iaasvmcontainerv2;${resourceGroupName};${vm.vmName}'
-    policyName: 'VMPolicyEnhanced'
-    protectedItemType: 'Microsoft.Compute/virtualMachines'
-    protectionContainerName: 'IaasVMContainer;iaasvmcontainerv2;${resourceGroupName};${vm.vmName}'
-    sourceResourceId: vm.sourceResourceId
   }
 ]
 
@@ -308,7 +172,7 @@ module recoveryServicesVault 'br/public:avm/res/recovery-services/vault:0.11.1' 
     ]
     immutabilitySettingState: 'Disabled'
     backupPolicies: backupPolicies
-    protectedItems: recoveryServicesProtectedItems
+    protectedItems: []
     softDeleteSettings: {
       softDeleteRetentionPeriodInDays: softDeleteRetentionInDays
       softDeleteState: 'Disabled'

@@ -126,7 +126,7 @@ jobs:
             Write-Output "Runner: $runner2"
 
 
-            $vms = 1..5
+            $vms = 1..4
             # $sqlServers = 1..1
             # $passPhrase = 1..1
             $credentialsToCreate = @{}
@@ -191,6 +191,7 @@ jobs:
               -TemplateFile ".\Bicep\modules\main-deployment.bicep" `
               -TemplateParameterFile ".\Bicep\Environments\${{inputs.environmentName}}\2.main-deployment.json" `
               -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
+              -solution "${{inputs.solution}}" `
               -KeyVaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" `
               -environment "${{inputs.environmentName}}" # -whatif
             Write-Output "Time end VM deployment: $(get-date)"
