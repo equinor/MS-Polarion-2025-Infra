@@ -269,19 +269,22 @@ resource recoveryServicesVault 'Microsoft.RecoveryServices/vaults@2023-06-01' ex
   scope: resourceGroup(recoveryServicesVaultRG.name)
 }
 
-resource recoveryServicesProtectedItems 'Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems@2023-06-01' = [
+var recoveryServicesProtectedItemInputs = [
   for (vm, i) in vmInstances: {
-    name: '${recoveryServicesVault.name}/Azure/IaasVMContainer;iaasvmcontainerv2;${resourceGroup().name};${vm.name}/VM;iaasvmcontainerv2;${resourceGroup().name};${vm.name}'
-    properties: {
-      protectedItemType: 'Microsoft.Compute/virtualMachines'
-      policyId: '${recoveryServicesVault.id}/backupPolicies/VMPolicyEnhanced'
-      sourceResourceId: windowsVm[i].outputs.resourceId
-    }
-    dependsOn: [
-      windowsVm[i]
-    ]
+    vmName: vm.name
+    sourceResourceId: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Compute/virtualMachines/${vm.name}'
   }
 ]
+
+module recoveryServicesProtectedItems 'recovery-services-protected-items.bicep' = {
+  name: '${solution}-rsv-protected-items-${environment}'
+  params: {
+    recoveryServicesVaultName: recoveryServicesVault.name
+    workloadResourceGroupName: resourceGroup().name
+    protectedItems: recoveryServicesProtectedItemInputs
+  }
+  scope: resourceGroup(recoveryServicesVaultRG.name)
+}
 
 resource windowsAdminCenterExtension 'Microsoft.Compute/virtualMachines/extensions@2023-09-01' = [
   for (vm, i) in vmInstances: if (enableWindowsAdminCenterExtension) {
