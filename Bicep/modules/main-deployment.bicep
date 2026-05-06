@@ -223,7 +223,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           protocol: '*'
           sourcePortRange: '*'
           destinationPortRange: '*'
-          sourceAddressPrefixes: '*'
+          sourceAddressPrefix: '*'
           destinationAddressPrefix: '*'
           access: 'Deny'
           priority: 4096
