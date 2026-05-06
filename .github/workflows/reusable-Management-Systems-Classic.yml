@@ -192,6 +192,7 @@ jobs:
               -TemplateParameterFile ".\Bicep\Environments\${{inputs.environmentName}}\2.main-deployment.json" `
               -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -solution "${{inputs.solution}}" `
+              -recoveryServicesVaultRGName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}-RSV" `
               -KeyVaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" `
               -environment "${{inputs.environmentName}}" # -whatif
             Write-Output "Time end VM deployment: $(get-date)"
