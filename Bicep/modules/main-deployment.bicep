@@ -240,7 +240,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefix: 'AzureLoadBalancer'
           destinationAddressPrefix: 'VirtualNetwork'
           access: 'Allow'
-          priority: 4096
+          priority: 3001
           direction: 'Inbound'
         }
       }
