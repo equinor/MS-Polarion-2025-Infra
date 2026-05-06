@@ -236,7 +236,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefixes: vmPrivateIpAddresses
           destinationAddressPrefix: 'Internet'
           access: 'Allow'
-          priority: 3000
+          priority: 3001
           direction: 'Outbound'
         }
       }
