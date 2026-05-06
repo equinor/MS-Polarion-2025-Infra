@@ -32,9 +32,6 @@ param sharedNetworkResourceGroupName string
 @description('Shared NSG name that should receive VM-derived rules.')
 param sharedNetworkSecurityGroupName string
 
-@description('Resource group containing the Recovery Services Vault.')
-param recoveryServicesVaultRGName string
-
 @description('Per-VM configuration array. Each object should contain: vmSize, vmImageSku, osDiskSizeGB, hasDataDisk, dataDiskSizeGB, dataDiskStorageType, privateIPAddress.')
 param vmConfigurations array = []
 
@@ -57,6 +54,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
 var environmentSuffix = '${toUpper(substring(environment, 0, 1))}${toLower(substring(environment, 1))}'
 var effectiveVmCount = length(vmConfigurations) > 0 ? length(vmConfigurations) : vmCount
 var vmPrivateIpAddresses = [for vm in vmInstances: vm.config.privateIPAddress]
+var recoveryServicesVaultResourceGroupName = '${resourceGroup().name}-RSV'
 var recoveryServicesVaultName = '${toLower(solution)}-rsv-${toLower(environment)}'
 
 var vmInstances = [
@@ -248,7 +246,7 @@ module sharedNetworkSecurityGroupRules 'shared-nsg-security-rules.bicep' = {
 }
 
 resource recoveryServicesVaultRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
-  name: recoveryServicesVaultRGName
+  name: recoveryServicesVaultResourceGroupName
   scope: subscription()
 }
 
