@@ -216,6 +216,20 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           direction: 'Outbound'
         }
       }
+      {
+        name: 'OmniaDenyAllInbound'
+        properties: {
+          description: 'Deny all inbound traffic from VM private IPs to the internet'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefixes: '*'
+          destinationAddressPrefix: '*'
+          access: 'Deny'
+          priority: 4096
+          direction: 'Inbound'
+        }
+      }
     ]
   : []
 
