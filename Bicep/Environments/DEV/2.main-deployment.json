@@ -34,9 +34,6 @@
         "sharedNetworkSecurityGroupName": {
             "value": "S499-NOE-snet-compute-polarion-dev-nsg"
         },
-        "recoveryServicesVaultRGName": {
-            "value": "S499-MS-POLARION-2025-DEV-RSV"
-        },
         "enableWindowsAdminCenterExtension": {
             "value": true
         },
