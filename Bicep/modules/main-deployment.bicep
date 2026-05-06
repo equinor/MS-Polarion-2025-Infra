@@ -23,6 +23,18 @@ param vmSize string = 'Standard_D4s_v5'
 @description('Base name aligned with naming standard. Resulting names become <base><NN><Environment>, for example S499POLWS01Dev.')
 param vmNameBase string = 'S499POLWS'
 
+@description('Solution name used in resource naming conventions.')
+param solution string
+
+@description('Resource group containing the shared NSG that should receive VM-derived rules.')
+param sharedNetworkResourceGroupName string
+
+@description('Shared NSG name that should receive VM-derived rules.')
+param sharedNetworkSecurityGroupName string
+
+@description('Resource group containing the Recovery Services Vault.')
+param recoveryServicesVaultRGName string
+
 @description('Per-VM configuration array. Each object should contain: vmSize, vmImageSku, osDiskSizeGB, hasDataDisk, dataDiskSizeGB, dataDiskStorageType, privateIPAddress.')
 param vmConfigurations array = []
 
@@ -44,6 +56,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
 
 var environmentSuffix = '${toUpper(substring(environment, 0, 1))}${toLower(substring(environment, 1))}'
 var effectiveVmCount = length(vmConfigurations) > 0 ? length(vmConfigurations) : vmCount
+var vmPrivateIpAddresses = [for vm in vmInstances: vm.config.privateIPAddress]
+var recoveryServicesVaultName = '${toLower(solution)}-rsv-${toLower(environment)}'
 
 var vmInstances = [
   for i in range(0, effectiveVmCount): {
@@ -116,6 +130,144 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
       ]
       tags: tags
     }
+  }
+]
+
+var nsgBaseSecurityRules = [
+  {
+    name: 'Allow-LDAP-Kerberos-Any-Any'
+    properties: {
+      description: 'Allow inbound TCP 88 (Kerberos) and 389 (LDAP) from Any to Any'
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRanges: [
+        '88'
+        '389'
+      ]
+      sourceAddressPrefix: '*'
+      destinationAddressPrefix: '*'
+      access: 'Allow'
+      priority: 2890
+      direction: 'Inbound'
+    }
+  }
+  {
+    name: 'Allow-443-6516-5433-VirtualNetwork'
+    properties: {
+      description: 'Allow inbound TCP 443, 6516, and 5433 from VirtualNetwork to VirtualNetwork'
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRanges: [
+        '443'
+        '6516'
+        '5433'
+      ]
+      sourceAddressPrefix: 'VirtualNetwork'
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 2891
+      direction: 'Inbound'
+    }
+  }
+]
+
+var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
+  ? [
+      {
+        name: 'Allow-RDP-3389-VirtualNetwork-All-VMs'
+        properties: {
+          description: 'Allow inbound TCP 3389 traffic from VirtualNetwork to all configured VM private IPs'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '3389'
+          sourceAddressPrefix: 'VirtualNetwork'
+          destinationAddressPrefixes: vmPrivateIpAddresses
+          access: 'Allow'
+          priority: 2990
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'Deny-RDP-3389-All-VMs'
+        properties: {
+          description: 'Deny inbound TCP 3389 traffic to all configured VM private IPs'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '3389'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefixes: vmPrivateIpAddresses
+          access: 'Deny'
+          priority: 3000
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'Allow_Web_Outbound'
+        properties: {
+          description: 'Allow outbound TCP 80 and 443 traffic from VM private IPs to the internet'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRanges: [
+            '80'
+            '443'
+          ]
+          sourceAddressPrefixes: vmPrivateIpAddresses
+          destinationAddressPrefix: 'Internet'
+          access: 'Allow'
+          priority: 3001
+          direction: 'Outbound'
+        }
+      }
+    ]
+  : []
+
+var nsgSecurityRules = concat(nsgBaseSecurityRules, nsgRdpSecurityRules)
+
+module workloadNetworkSecurityGroup 'br/public:avm/res/network/network-security-group:0.4.0' = {
+  name: '${solution}-nsg-${environment}'
+  params: {
+    location: resourceGroup().location
+    name: '${toLower(solution)}-nsg-${toLower(environment)}'
+    tags: tags
+    securityRules: nsgSecurityRules
+  }
+}
+
+resource sharedNetworkRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
+  name: sharedNetworkResourceGroupName
+  scope: subscription()
+}
+
+module sharedNetworkSecurityGroupRules 'shared-nsg-security-rules.bicep' = {
+  name: '${solution}-shared-nsg-rules-${environment}'
+  params: {
+    networkSecurityGroupName: sharedNetworkSecurityGroupName
+    securityRules: nsgSecurityRules
+  }
+  scope: resourceGroup(sharedNetworkRG.name)
+}
+
+resource recoveryServicesVaultRG 'Microsoft.Resources/resourceGroups@2021-04-01' existing = {
+  name: recoveryServicesVaultRGName
+  scope: subscription()
+}
+
+resource recoveryServicesVault 'Microsoft.RecoveryServices/vaults@2023-06-01' existing = {
+  name: recoveryServicesVaultName
+  scope: resourceGroup(recoveryServicesVaultRG.name)
+}
+
+resource recoveryServicesProtectedItems 'Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems@2023-06-01' = [
+  for (vm, i) in vmInstances: {
+    name: '${recoveryServicesVault.name}/Azure/IaasVMContainer;iaasvmcontainerv2;${resourceGroup().name};${vm.name}/VM;iaasvmcontainerv2;${resourceGroup().name};${vm.name}'
+    properties: {
+      protectedItemType: 'Microsoft.Compute/virtualMachines'
+      policyId: '${recoveryServicesVault.id}/backupPolicies/VMPolicyEnhanced'
+      sourceResourceId: windowsVm[i].outputs.resourceId
+    }
+    dependsOn: [
+      windowsVm[i]
+    ]
   }
 ]
 

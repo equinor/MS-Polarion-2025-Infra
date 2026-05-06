@@ -18,10 +18,6 @@ param networkAccessPolicies object
 param subnetConfig object
 param skuName string
 param storageAccountName string
-@description('Resource group containing the shared NSG to update with environment-specific rules.')
-param sharedNetworkResourceGroupName string
-@description('Shared NSG name to update with environment-specific rules.')
-param sharedNetworkSecurityGroupName string
 param runner string
 @description('Controls whether the GitHub runner IP is temporarily allowed in Key Vault network ACLs during bootstrap.')
 param includeRunnerAccess bool = true
@@ -29,8 +25,6 @@ param includeRunnerAccess bool = true
 param enablePurgeProtection bool = false
 param publicNetworkAccessLogAnalytics string = 'Disabled'
 param vmAdminPasswordSecretNameSuffix string = '-localadmin-password'
-@description('Per-VM configuration array used by VM deployment. Each object should contain privateIPAddress.')
-param vmConfigurations array = []
 @description('Base name aligned with VM naming standard used by main VM deployment module.')
 param vmNameBase string = 'S499POLWS'
 
@@ -57,15 +51,6 @@ param initialKeyVaultSecrets object = {}
 ])
 param environment string
 param tags object
-
-var vmPrivateIpAddresses = [for vm in vmConfigurations: vm.privateIPAddress]
-var environmentSuffix = '${toUpper(substring(environment, 0, 1))}${toLower(substring(environment, 1))}'
-var vmBackupItems = [
-  for i in range(0, length(vmConfigurations)): {
-    vmName: '${toUpper(vmNameBase)}${padLeft(string(i + 1), 2, '0')}${environmentSuffix}'
-    sourceResourceId: '/subscriptions/${subscriptionId}/resourceGroups/${newRG.name}/providers/Microsoft.Compute/virtualMachines/${toUpper(vmNameBase)}${padLeft(string(i + 1), 2, '0')}${environmentSuffix}'
-  }
-]
 
 @description('Please enter tags to identify your resources, cost allocation unit, contact person, solution etc as shown below.')
 param deploymentTags object = {
@@ -115,10 +100,6 @@ module dependencyDeployment './modules/dependencies.bicep' = {
     solution: solution
     skuName: skuName
     storageAccountName: storageAccountName
-    sharedNetworkResourceGroupName: sharedNetworkResourceGroupName
-    sharedNetworkSecurityGroupName: sharedNetworkSecurityGroupName
-    vmPrivateIpAddresses: vmPrivateIpAddresses
-    vmBackupItems: vmBackupItems
     runner: runner
     includeRunnerAccess: includeRunnerAccess
     enablePurgeProtection: enablePurgeProtection
