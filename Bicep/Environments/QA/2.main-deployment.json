@@ -32,7 +32,7 @@
             "value": "S499-NOE-Network"
         },
         "sharedNetworkSecurityGroupName": {
-            "value": "S499-NOE-snet-compute-polarion-qa"
+            "value": "S499-NOE-snet-compute-polarion-qa-nsg"
         },
         "enableWindowsAdminCenterExtension": {
             "value": true
