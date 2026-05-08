@@ -226,7 +226,21 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefix: '*'
           destinationAddressPrefix: '*'
           access: 'Deny'
-          priority: 4096
+          priority: 4050
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'Allow_Azure_LoadBalancer_Inbound'
+        properties: {
+          description: 'Allow inbound traffic from Azure Load Balancer'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: 'AzureLoadBalancer'
+          destinationAddressPrefix: 'VirtualNetwork'
+          access: 'Allow'
+          priority: 3001
           direction: 'Inbound'
         }
       }
