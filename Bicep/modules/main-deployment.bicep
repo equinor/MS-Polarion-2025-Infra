@@ -265,6 +265,27 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           direction: 'Inbound'
         }
       }
+      {
+        name: 'Polarion2025_AD_Allow_VN'
+        properties: {
+          description: 'Allow AD connection from Virtual Network'
+          protocol: '*'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRanges: [
+            '53'
+            '389'
+            '88'
+            '135-139'
+            '445'
+            '636'
+          ]
+          access: 'Allow'
+          priority: 2892
+          direction: 'Inbound'
+        }
+      }
     ]
   : []
 
