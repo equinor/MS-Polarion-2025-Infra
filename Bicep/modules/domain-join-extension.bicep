@@ -15,7 +15,7 @@ resource domainJoinExtension 'Microsoft.Compute/virtualMachines/extensions@2023-
     type: 'JsonADDomainExtension'
     typeHandlerVersion: '1.3'
     autoUpgradeMinorVersion: true
-    enableAutomaticUpgrade: true
+    enableAutomaticUpgrade: false
     settings: domainJoinSettings
     protectedSettings: {
       Password: domainJoinKey
