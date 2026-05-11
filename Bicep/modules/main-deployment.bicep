@@ -41,6 +41,9 @@ param tags object = {}
 @description('Controls whether the Windows Admin Center VM extension is deployed on each VM.')
 param enableWindowsAdminCenterExtension bool = true
 
+param subscriptionId string = subscription().subscriptionId
+param subscriptionPrefix string
+
 @description('Settings passed to the Windows Admin Center extension.')
 param windowsAdminCenterExtensionSettings object = {
   port: '6516'
@@ -49,6 +52,24 @@ param windowsAdminCenterExtensionSettings object = {
 
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: keyVaultName
+}
+
+resource kv 'Microsoft.KeyVault/vaults@2023-02-01' existing = {
+  name: 'S499-FkeyADJoin'
+  scope: resourceGroup(subscriptionId, 'S499-ADKeyJoin')
+}
+
+output kvName string = kv.name
+
+var extensionDomainJoinConfig = {
+  enabled: true
+  settings: {
+    Name: 'statoil.net'
+    OUPath: 'OU=${subscriptionPrefix},OU=Omnia Classic,OU=Cloud Servers,OU=Servers,DC=statoil,DC=net'
+    User: 'f_ocdj_${subscriptionPrefix}@statoil.net'
+    Restart: true
+    Options: 3
+  }
 }
 
 var environmentSuffix = '${toUpper(substring(environment, 0, 1))}${toLower(substring(environment, 1))}'
@@ -244,20 +265,6 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           direction: 'Inbound'
         }
       }
-      {
-        name: 'Allow_Azure_LoadBalancer_Inbound'
-        properties: {
-          description: 'Allow inbound traffic from Azure Load Balancer'
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRange: '*'
-          sourceAddressPrefix: 'AzureLoadBalancer'
-          destinationAddressPrefix: 'VirtualNetwork'
-          access: 'Allow'
-          priority: 3001
-          direction: 'Inbound'
-        }
-      }
     ]
   : []
 
@@ -325,6 +332,21 @@ resource windowsAdminCenterExtension 'Microsoft.Compute/virtualMachines/extensio
       autoUpgradeMinorVersion: true
       enableAutomaticUpgrade: true
       settings: windowsAdminCenterExtensionSettings
+    }
+    dependsOn: [
+      windowsVm[i]
+    ]
+  }
+]
+
+module domainJoinExtension 'domain-join-extension.bicep' = [
+  for (vm, i) in vmInstances: if (extensionDomainJoinConfig.enabled) {
+    name: '${vm.name}-domainJoin'
+    params: {
+      vmName: vm.name
+      location: resourceGroup().location
+      domainJoinSettings: extensionDomainJoinConfig.settings
+      domainJoinKey: kv.getSecret('domainJoinKey')
     }
     dependsOn: [
       windowsVm[i]
