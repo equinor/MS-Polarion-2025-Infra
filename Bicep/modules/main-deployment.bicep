@@ -173,7 +173,7 @@ var nsgBaseSecurityRules = [
   {
     name: 'Allow-VirtualNetwork-Inbound'
     properties: {
-      description: 'Allow inbound TCP 443, 6516, and 5433 from VirtualNetwork to VirtualNetwork'
+      description: 'Allow inbound TCP from VirtualNetwork to VirtualNetwork'
       protocol: 'Tcp'
       sourcePortRange: '*'
       destinationPortRanges: [
