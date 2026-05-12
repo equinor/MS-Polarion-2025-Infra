@@ -50,6 +50,9 @@ param windowsAdminCenterExtensionSettings object = {
   salt: ''
 }
 
+@description('Secret name in S499-FkeyADJoin Key Vault containing the AD join account password.')
+param domainJoinPasswordSecretName string = 'domainJoinKey'
+
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: keyVaultName
 }
@@ -66,7 +69,8 @@ var extensionDomainJoinConfig = {
   settings: {
     Name: 'statoil.net'
     OUPath: 'OU=${subscriptionPrefix},OU=Omnia Classic,OU=Cloud Servers,OU=Servers,DC=statoil,DC=net'
-    User: 'f_ocdj_${subscriptionPrefix}@statoil.net'
+    // JsonADDomainExtension authentication is most reliable with DOMAIN\\user format.
+    User: 'STATOIL\\f_ocdj_${subscriptionPrefix}'
     Restart: true
     Options: 3
   }
@@ -429,7 +433,7 @@ module domainJoinExtension 'domain-join-extension.bicep' = [
       vmName: vm.name
       location: resourceGroup().location
       domainJoinSettings: extensionDomainJoinConfig.settings
-      domainJoinKey: kv.getSecret('domainJoinKey')
+      domainJoinKey: kv.getSecret(domainJoinPasswordSecretName)
     }
     dependsOn: [
       windowsVm[i]
