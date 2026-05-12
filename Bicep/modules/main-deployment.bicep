@@ -216,7 +216,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefix: '*'
           destinationAddressPrefixes: vmPrivateIpAddresses
           access: 'Deny'
-          priority: 1003
+          priority: 4049
           direction: 'Inbound'
         }
       }
