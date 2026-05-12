@@ -166,7 +166,7 @@ var nsgBaseSecurityRules = [
       sourceAddressPrefix: '*'
       destinationAddressPrefix: '*'
       access: 'Allow'
-      priority: 2890
+      priority: 1000
       direction: 'Inbound'
     }
   }
@@ -184,7 +184,7 @@ var nsgBaseSecurityRules = [
       sourceAddressPrefix: 'VirtualNetwork'
       destinationAddressPrefix: 'VirtualNetwork'
       access: 'Allow'
-      priority: 2891
+      priority: 1001
       direction: 'Inbound'
     }
   }
@@ -202,7 +202,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefix: 'VirtualNetwork'
           destinationAddressPrefixes: vmPrivateIpAddresses
           access: 'Allow'
-          priority: 2990
+          priority: 1002
           direction: 'Inbound'
         }
       }
@@ -216,7 +216,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefix: '*'
           destinationAddressPrefixes: vmPrivateIpAddresses
           access: 'Deny'
-          priority: 3000
+          priority: 1003
           direction: 'Inbound'
         }
       }
@@ -233,7 +233,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefixes: vmPrivateIpAddresses
           destinationAddressPrefix: 'Internet'
           access: 'Allow'
-          priority: 3001
+          priority: 1004
           direction: 'Outbound'
         }
       }
@@ -261,7 +261,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefix: 'AzureLoadBalancer'
           destinationAddressPrefix: 'VirtualNetwork'
           access: 'Allow'
-          priority: 3001
+          priority: 1005
           direction: 'Inbound'
         }
       }
@@ -282,8 +282,87 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
             '636'
           ]
           access: 'Allow'
-          priority: 2892
+          priority: 1006
           direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowVnetInBound'
+        properties: {
+          description: ''
+          protocol: '*'
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+          destinationAddressPrefix: 'VirtualNetwork'
+          destinationPortRanges: [
+            '443'
+            '6516'
+          ]
+          access: 'Allow'
+          priority: 1007
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowEntraIdOutbound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '443'
+          sourceAddressPrefixes: vmPrivateIpAddresses
+          destinationAddressPrefix: 'AzureActiveDirectory'
+          access: 'Allow'
+          priority: 1008
+          direction: 'Outbound'
+          sourcePortRanges: []
+          destinationPortRanges: []
+          destinationAddressPrefixes: []
+        }
+      }
+      {
+        name: 'AllowEntraIdInbound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '443'
+          sourceAddressPrefix: 'AzureActiveDirectory'
+          destinationAddressPrefixes: vmPrivateIpAddresses
+          access: 'Allow'
+          priority: 1009
+          direction: 'Inbound'
+          sourcePortRanges: []
+          destinationPortRanges: []
+          sourceAddressPrefixes: []
+        }
+      }
+      {
+        name: 'AllowAllPortsInternalInbound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefixes: vmPrivateIpAddresses
+          destinationAddressPrefixes: vmPrivateIpAddresses
+          access: 'Allow'
+          priority: 1010
+          direction: 'Inbound'
+          sourcePortRanges: []
+          destinationPortRanges: []
+        }
+      }
+      {
+        name: 'AllowAllPortsInternalOutbound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefixes: vmPrivateIpAddresses
+          destinationAddressPrefixes: vmPrivateIpAddresses
+          access: 'Allow'
+          priority: 1011
+          direction: 'Outbound'
+          sourcePortRanges: []
+          destinationPortRanges: []
         }
       }
     ]
