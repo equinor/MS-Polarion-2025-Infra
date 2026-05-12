@@ -240,33 +240,33 @@ jobs:
 
             Write-Output "VmList: $($vmList -join ', ')"
 
-            # # Check if there are any VMs in the list
-            # if ($vmList.Count -eq 0) {
-            #   Write-Output "No VMs found in resource group $resourceGroupName"
-            #   exit 1
-            # }
+            # Check if there are any VMs in the list
+            if ($vmList.Count -eq 0) {
+              Write-Output "No VMs found in resource group $resourceGroupName"
+              exit 1
+            }
 
-            # # Loop through each VM in the list
-            # foreach ($vmName in $vmList) {
-            #   # Create JSON data for each server
-            #   $jsonData = @{
-            #     "serverName" = $vmName
-            #     "members"    = $members
-            #   } | ConvertTo-Json
+            # Loop through each VM in the list
+            foreach ($vmName in $vmList) {
+              # Create JSON data for each server
+              $jsonData = @{
+                "serverName" = $vmName
+                "members"    = $members
+              } | ConvertTo-Json
 
-            #   $scriptBlock = @"
-            #     try {
-            #       # Invoke the REST method for each server
-            #       Invoke-RestMethod -Uri "https://ocn-adgroup.equinor.com/api/ServerAdGroup" -Method Post -Body $jsonData -ContentType "application/json" -Headers $headers
-            #     }
-            #     catch {
-            #       Write-Error "Failed to invoke REST method for server $vmName"
-            #       exit 1
-            #     }
-            # "@
-            #     # Run the script on the VM
-            #     Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -VMName $vmName -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
-            # }
+              $scriptBlock = @"
+                try {
+                  # Invoke the REST method for each server
+                  Invoke-RestMethod -Uri "https://ocn-adgroup.equinor.com/api/ServerAdGroup" -Method Post -Body $jsonData -ContentType "application/json" -Headers $headers
+                }
+                catch {
+                  Write-Error "Failed to invoke REST method for server $vmName"
+                  exit 1
+                }
+            "@
+                # Run the script on the VM
+                Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -VMName $vmName -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+            }
 
       # - name: Deploy Step 6 - Run PowerShell scripts Add Admin_SecurityGroups for vms
       #   uses: azure/powershell@v2
