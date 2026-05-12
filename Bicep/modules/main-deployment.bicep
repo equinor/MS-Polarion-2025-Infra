@@ -171,7 +171,7 @@ var nsgBaseSecurityRules = [
     }
   }
   {
-    name: 'Allow-443-6516-5433-VirtualNetwork'
+    name: 'Allow-VirtualNetwork-Inbound'
     properties: {
       description: 'Allow inbound TCP 443, 6516, and 5433 from VirtualNetwork to VirtualNetwork'
       protocol: 'Tcp'
@@ -283,23 +283,6 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           ]
           access: 'Allow'
           priority: 1006
-          direction: 'Inbound'
-        }
-      }
-      {
-        name: 'AllowVnetInBound'
-        properties: {
-          description: ''
-          protocol: '*'
-          sourceAddressPrefix: 'VirtualNetwork'
-          sourcePortRange: '*'
-          destinationAddressPrefix: 'VirtualNetwork'
-          destinationPortRanges: [
-            '443'
-            '6516'
-          ]
-          access: 'Allow'
-          priority: 1007
           direction: 'Inbound'
         }
       }
