@@ -218,3 +218,109 @@ jobs:
                 -runner $runner `
                 -includeRunnerAccess $false # -whatif
             Write-Output "Time end hardening deployment: $(get-date)"
+
+      - name: Deploy Step 5 - Create Admin_SecurityGroups for VMs
+        uses: azure/powershell@v2
+        with:
+          azPSVersion: latest
+          inlineScript: |
+            # Define headers for the REST method
+            $headers = @{
+              "Accept" = "application/json"
+            }
+
+            # Define members for the JSON data
+            $members = @("a_torme", "a_otras", "a_mhaag")
+
+            # Get the resource group name
+            $resourceGroupName = "${env:SubscriptionPrefix}-${env:resourceGroupName}-${env:environmentName}" # Replace with your resource group name
+
+            # Get the list of VMs in the resource group
+            $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+            Write-Output "VmList: $($vmList -join ', ')"
+
+            # # Check if there are any VMs in the list
+            # if ($vmList.Count -eq 0) {
+            #   Write-Output "No VMs found in resource group $resourceGroupName"
+            #   exit 1
+            # }
+
+            # # Loop through each VM in the list
+            # foreach ($vmName in $vmList) {
+            #   # Create JSON data for each server
+            #   $jsonData = @{
+            #     "serverName" = $vmName
+            #     "members"    = $members
+            #   } | ConvertTo-Json
+
+            #   $scriptBlock = @"
+            #     try {
+            #       # Invoke the REST method for each server
+            #       Invoke-RestMethod -Uri "https://ocn-adgroup.equinor.com/api/ServerAdGroup" -Method Post -Body $jsonData -ContentType "application/json" -Headers $headers
+            #     }
+            #     catch {
+            #       Write-Error "Failed to invoke REST method for server $vmName"
+            #       exit 1
+            #     }
+            # "@
+            #     # Run the script on the VM
+            #     Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -VMName $vmName -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+            # }
+
+      # - name: Deploy Step 6 - Run PowerShell scripts Add Admin_SecurityGroups for vms
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: latest
+      #     inlineScript: |
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       foreach ($VM in $vmList) {
+      #         $securityGroupName = "Admin_$VM"
+      #         $domainSecurityGroup = "statoil.net\$securityGroupName"
+
+      #         # Define the script block to add the security group to the local administrators group
+      #         $scriptBlock = @"
+      #           # Install the Active Directory module
+      #           Install-WindowsFeature RSAT-AD-PowerShell
+
+      #           # Import the Active Directory module
+      #           Import-Module ActiveDirectory
+
+      #           # Add the security group to the local administrators group
+      #           Add-LocalGroupMember -Group 'Administrators' -Member '$domainSecurityGroup'
+      #       "@
+
+      #         # Run the script on the VM
+      #         Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+      #       }
+
+      # - name: Deploy Step 7 - Run PowerShell scripts Add AccessIT Admin_SecurityGroups for vms
+      #   uses: azure/powershell@v2
+      #   with:
+      #     azPSVersion: latest
+      #     inlineScript: |
+      #       # Define the resource group name
+      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+
+      #       foreach ($VM in $vmList) {
+      #         $securityGroupName = "S499-MSC-Polarion-VMLogin_admins"
+      #         $domainSecurityGroup = "statoil.net\$securityGroupName"
+
+      #         # Define the script block to add the security group to the local administrators group
+      #         $scriptBlock = @"
+      #           # Install the Active Directory module
+      #           Install-WindowsFeature RSAT-AD-PowerShell
+
+      #           # Import the Active Directory module
+      #           Import-Module ActiveDirectory
+
+      #           # Add the security group to the local administrators group
+      #           Add-LocalGroupMember -Group 'Administrators' -Member '$domainSecurityGroup'
+      #       "@
+
+      #         # Run the script on the VM
+      #         Invoke-AzVMRunCommand -ResourceGroupName  $resourceGroupName -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+      #       }
