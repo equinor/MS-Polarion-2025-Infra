@@ -291,6 +291,8 @@ jobs:
             $resourceGroupName = "${env:SubscriptionPrefix}-${env:resourceGroupName}-${env:environmentName}" # Replace with your resource group name
             $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
 
+            Write-Output "VmList: $($vmList -join ', ')"
+
             foreach ($VM in $vmList) {
               $securityGroupName = "Admin_$VM"
               $domainSecurityGroup = "statoil.net\$securityGroupName"
@@ -311,31 +313,31 @@ jobs:
               Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
             }
 
-      # - name: Deploy Step 7 - Run PowerShell scripts Add AccessIT Admin_SecurityGroups for vms
-      #   uses: azure/powershell@v2
-      #   with:
-      #     azPSVersion: latest
-      #     inlineScript: |
-      #       # Define the resource group name
-      #       $resourceGroupName = "${env:SubscriptionPrefix}-${env:resourceGroupName}-${env:environmentName}" # Replace with your resource group name
-      #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
+      - name: Deploy Step 7 - Run PowerShell scripts Add AccessIT Admin_SecurityGroups for vms
+        uses: azure/powershell@v2
+        with:
+          azPSVersion: latest
+          inlineScript: |
+            # Define the resource group name
+            $resourceGroupName = "${env:SubscriptionPrefix}-${env:resourceGroupName}-${env:environmentName}" # Replace with your resource group name
+            $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
 
-      #       foreach ($VM in $vmList) {
-      #         $securityGroupName = "S499-MSC-Polarion-VMLogin_admins"
-      #         $domainSecurityGroup = "statoil.net\$securityGroupName"
+            foreach ($VM in $vmList) {
+              $securityGroupName = "S499-MSC-Polarion-VMLogin_admins"
+              $domainSecurityGroup = "statoil.net\$securityGroupName"
 
-      #         # Define the script block to add the security group to the local administrators group
-      #         $scriptBlock = @"
-      #           # Install the Active Directory module
-      #           Install-WindowsFeature RSAT-AD-PowerShell
+              # Define the script block to add the security group to the local administrators group
+              $scriptBlock = @"
+                # Install the Active Directory module
+                Install-WindowsFeature RSAT-AD-PowerShell
 
-      #           # Import the Active Directory module
-      #           Import-Module ActiveDirectory
+                # Import the Active Directory module
+                Import-Module ActiveDirectory
 
-      #           # Add the security group to the local administrators group
-      #           Add-LocalGroupMember -Group 'Administrators' -Member '$domainSecurityGroup'
-      #       "@
+                # Add the security group to the local administrators group
+                Add-LocalGroupMember -Group 'Administrators' -Member '$domainSecurityGroup'
+            "@
 
-      #         # Run the script on the VM
-      #         Invoke-AzVMRunCommand -ResourceGroupName  $resourceGroupName -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
-      #       }
+              # Run the script on the VM
+              Invoke-AzVMRunCommand -ResourceGroupName  $resourceGroupName -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+            }
