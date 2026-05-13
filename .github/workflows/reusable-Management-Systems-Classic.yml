@@ -254,7 +254,7 @@ jobs:
                 "members"    = $members
               } | ConvertTo-Json
 
-              Write-Output "JsonData for $vmName: $jsonData"
+              Write-Output "JsonData for ${vmName}: $jsonData"
               
               $scriptBlock = @"
                 try {
