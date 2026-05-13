@@ -288,7 +288,7 @@ jobs:
         with:
           azPSVersion: latest
           inlineScript: |
-            $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+            $resourceGroupName = "${env:SubscriptionPrefix}-${env:resourceGroupName}-${env:environmentName}" # Replace with your resource group name
             $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
 
             foreach ($VM in $vmList) {
@@ -308,7 +308,7 @@ jobs:
             "@
 
               # Run the script on the VM
-              Invoke-AzVMRunCommand -ResourceGroupName "s499-ms-polarion-${{ env.environmentName }}" -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+              Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -VMName $VM -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
             }
 
       # - name: Deploy Step 7 - Run PowerShell scripts Add AccessIT Admin_SecurityGroups for vms
@@ -317,7 +317,7 @@ jobs:
       #     azPSVersion: latest
       #     inlineScript: |
       #       # Define the resource group name
-      #       $resourceGroupName = "${{ env.SubscriptionPrefix }}-${{ env.resourceGroupName }}-${{ env.environmentName }}" # Replace with your resource group name
+      #       $resourceGroupName = "${env:SubscriptionPrefix}-${env:resourceGroupName}-${env:environmentName}" # Replace with your resource group name
       #       $vmList = Get-AzVM -ResourceGroupName $resourceGroupName | ForEach-Object { $_.Name }
 
       #       foreach ($VM in $vmList) {
