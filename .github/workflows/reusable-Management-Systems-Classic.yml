@@ -264,8 +264,16 @@ jobs:
                   exit 1
                 }
             "@
-                # Run the script on the VM
-                Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -VMName $vmName -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock
+                try {
+                  # Run the script on the VM
+                  Invoke-AzVMRunCommand -ResourceGroupName $resourceGroupName -VMName $vmName -CommandId 'RunPowerShellScript' -ScriptString $scriptBlock -errorAction Stop
+                }
+                catch {
+                  $error[0] | Format-List -Force
+                  # Write-Error "Failed to run command on VM $vmName"
+                  exit 1
+                }
+                
             }
 
       # - name: Deploy Step 6 - Run PowerShell scripts Add Admin_SecurityGroups for vms
