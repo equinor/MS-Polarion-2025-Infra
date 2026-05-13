@@ -254,6 +254,8 @@ jobs:
                 "members"    = $members
               } | ConvertTo-Json
 
+              Write-Output "JsonData for $vmName: $jsonData"
+              
               $scriptBlock = @"
                 try {
                   # Invoke the REST method for each server
