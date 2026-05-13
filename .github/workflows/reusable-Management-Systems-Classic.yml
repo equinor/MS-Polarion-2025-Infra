@@ -252,17 +252,22 @@ jobs:
               $jsonData = @{
                 "serverName" = $vmName
                 "members"    = $members
-              } | ConvertTo-Json
+              } | ConvertTo-Json -Depth 3 -Compress
+              $escapedJsonData = $jsonData.Replace("'", "''")
 
               Write-Output "JsonData for ${vmName}: $jsonData"
               
               $scriptBlock = @"
                 try {
+                  `$headers = @{
+                    "Accept" = "application/json"
+                  }
+
                   # Invoke the REST method for each server
-                  Invoke-RestMethod -Uri "https://ocn-adgroup.equinor.com/api/ServerAdGroup" -Method Post -Body $jsonData -ContentType "application/json" -Headers $headers
+                  Invoke-RestMethod -Uri "https://ocn-adgroup.equinor.com/api/ServerAdGroup" -Method Post -Body '$escapedJsonData' -ContentType "application/json" -Headers `$headers
                 }
                 catch {
-                  Write-Error "Failed to invoke REST method for server $vmName"
+                  Write-Error "Failed to invoke REST method for server ${vmName}"
                   exit 1
                 }
             "@
