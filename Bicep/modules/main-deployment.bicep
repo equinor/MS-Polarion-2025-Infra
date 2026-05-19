@@ -406,6 +406,9 @@ module recoveryServicesProtectedItems 'recovery-services-protected-items.bicep' 
     protectedItems: recoveryServicesProtectedItemInputs
   }
   scope: resourceGroup(recoveryServicesVaultRG.name)
+  dependsOn: [
+    windowsVm
+  ]
 }
 
 resource windowsAdminCenterExtension 'Microsoft.Compute/virtualMachines/extensions@2023-09-01' = [
