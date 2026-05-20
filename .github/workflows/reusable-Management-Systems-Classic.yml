@@ -230,7 +230,7 @@ jobs:
             }
 
             # Define members for the JSON data
-            $members = @("a_torme", "a_otras", "a_mhaag")
+            $members = @("a_torme", "a_otras", "a_mhaag", "a_knjoh")
 
             # Get the resource group name
             $resourceGroupName = "${env:SubscriptionPrefix}-${env:resourceGroupName}-${env:environmentName}" # Replace with your resource group name
