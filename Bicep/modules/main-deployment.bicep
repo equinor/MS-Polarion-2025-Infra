@@ -109,6 +109,7 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
       maintenanceConfigurationResourceId: '/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourcegroups/s499-ms-polarion-2025-${toLower(environment)}/providers/microsoft.maintenance/maintenanceconfigurations/monthlypatch-s499-ms-polarion-2025-${toLower(environment)}'
       patchMode: 'AutomaticByPlatform'
       patchAssessmentMode: 'AutomaticByPlatform'
+      enableHotpatching: false
       rebootSetting: 'Never'
       availabilityZone: -1
       name: vm.name
