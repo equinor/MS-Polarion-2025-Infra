@@ -16,6 +16,7 @@ The deployment is orchestrated by [Bicep/main.bicep](Bicep/main.bicep) and provi
 - 1 Network Security Group for workload resources
 - 1 Recovery Services Vault with private endpoint, backup policies, and protected item mapping
 - 1 empty Network Security Group in the Recovery Services Vault resource group
+- 1 monthly in-guest maintenance configuration per VM workload resource group when the VM module is deployed
 
 Note: the VM module exists in [Bicep/modules/main-deployment.bicep](Bicep/modules/main-deployment.bicep), but the module invocation is currently commented out in [Bicep/main.bicep](Bicep/main.bicep).
 
@@ -27,6 +28,11 @@ Based on [Bicep/modules/main-deployment.bicep](Bicep/modules/main-deployment.bic
 - VM size: `Standard_D4s_v5`
 - OS image: `MicrosoftWindowsServer/WindowsServer/2025-datacenter-g2/latest`
 - OS disk default: 512 GB, `Premium_LRS`
+- Maintenance configuration name pattern: `Monthly-<resource group name>`
+- Maintenance recurrence: second Sunday at 02:00 in `W. Europe Standard Time`
+- VM guest patch mode: `AutomaticByPlatform`
+- VM guest patch assessment mode: `AutomaticByPlatform`
+- VM hotpatching: disabled
 - VM name pattern: <VM_NAME_BASE><NN><EnvSuffix>
 - Default VM name base: S499POLWS
 - Example DEV VM names:
@@ -59,6 +65,7 @@ See [Bicep/main.bicep](Bicep/main.bicep). Key inputs include:
 - `runner`
 - `vmConfigurations` (used for VM IP extraction and backup protected item mapping)
 - `vmNameBase` (used for VM naming and backup protected item naming)
+- `maintenanceWindowStartDateTime` for the VM module parameter file (`2.main-deployment.json`)
 - `tags`
 
 ## Secret Requirements For VM Deployment

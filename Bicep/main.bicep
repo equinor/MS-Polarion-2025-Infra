@@ -27,6 +27,12 @@ param publicNetworkAccessLogAnalytics string = 'Disabled'
 param vmAdminPasswordSecretNameSuffix string = '-localadmin-password'
 @description('Base name aligned with VM naming standard used by main VM deployment module.')
 param vmNameBase string = 'S499POLWS'
+@description('Resource group containing the shared NSG that should receive VM-derived rules.')
+param sharedNetworkResourceGroupName string
+@description('Shared NSG name that should receive VM-derived rules.')
+param sharedNetworkSecurityGroupName string
+@description('Start date/time for the monthly VM maintenance window in YYYY-MM-DD hh:mm format.')
+param maintenanceWindowStartDateTime string = utcNow('yyyy-MM-dd HH:mm')
 
 @secure()
 @description('Initial Key Vault secrets to seed on first deployment. Object format: { "secret-name": "secret-value" }.')
@@ -121,19 +127,25 @@ output dependencyDeploymentOutput object = dependencyDeployment.outputs
 //   scope: resourceGroup(newRG.name)
 // }
 
-// module mainDeployment './modules/main-deployment.bicep' = {
-//   name: 'mainDeployment'
-//   params: {
-//     environment: environment
-//     subnetConfig: subnetConfig
-//     keyVaultName: dependencyDeployment.outputs.keyVaultName
-//     vmAdminPasswordSecretNameSuffix: vmAdminPasswordSecretNameSuffix
-//     tags: tags
-//   }
-//   scope: resourceGroup(newRG.name)
-// }
+module mainDeployment './modules/main-deployment.bicep' = {
+  name: 'mainDeployment'
+  params: {
+    environment: environment
+    subnetConfig: subnetConfig
+    keyVaultName: dependencyDeployment.outputs.keyVaultName
+    vmAdminPasswordSecretNameSuffix: vmAdminPasswordSecretNameSuffix
+    vmNameBase: vmNameBase
+    solution: solution
+    sharedNetworkResourceGroupName: sharedNetworkResourceGroupName
+    sharedNetworkSecurityGroupName: sharedNetworkSecurityGroupName
+    subscriptionPrefix: subscriptionPrefix
+    maintenanceWindowStartDateTime: maintenanceWindowStartDateTime
+    tags: tags
+  }
+  scope: resourceGroup(newRG.name)
+}
 
-// output mainDeploymentOutput object = {
-//   deployedVmNames: mainDeployment.outputs.deployedVmNames
-//   deployedVmIds: mainDeployment.outputs.deployedVmIds
-// }
+output mainDeploymentOutput object = {
+  deployedVmNames: mainDeployment.outputs.deployedVmNames
+  deployedVmIds: mainDeployment.outputs.deployedVmIds
+}
