@@ -88,10 +88,11 @@ var vmPrivateIpAddresses = [for vm in vmInstances: vm.config.privateIPAddress]
 var recoveryServicesVaultResourceGroupName = '${resourceGroup().name}-RSV'
 var recoveryServicesVaultName = '${toLower(solution)}-rsv-${toLower(environment)}'
 
-resource monthlyMaintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfigurations@2023-10-01-preview' = {
-  name: 'Monthly-${resourceGroup().name}'
-  location: resourceGroup().location
-  properties: {
+module monthlyMaintenanceConfiguration 'br/public:avm/res/maintenance/maintenance-configuration:0.4.0' = {
+  name: 'monthlyMaintenanceConfiguration'
+  params: {
+    name: 'Monthly-${resourceGroup().name}'
+    location: resourceGroup().location
     extensionProperties: {}
     installPatches: {
       rebootSetting: 'Never'
@@ -112,8 +113,8 @@ resource monthlyMaintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfi
     }
     namespace: 'Microsoft.Maintenance'
     visibility: 'Custom'
+    tags: tags
   }
-  tags: tags
 }
 
 var vmInstances = [
@@ -140,7 +141,7 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
     name: 'vm-${toLower(vm.name)}'
     params: {
       provisionVMAgent: true
-      maintenanceConfigurationResourceId: monthlyMaintenanceConfiguration.id
+      maintenanceConfigurationResourceId: monthlyMaintenanceConfiguration.outputs.resourceId
       patchMode: 'AutomaticByPlatform'
       patchAssessmentMode: 'AutomaticByPlatform'
       enableHotpatching: false
@@ -487,5 +488,5 @@ module domainJoinExtension 'domain-join-extension.bicep' = [
 output deployedVmNames array = [for vm in vmInstances: vm.name]
 output deployedVmIds array = [for (vm, i) in vmInstances: windowsVm[i].outputs.resourceId]
 output deployedVmPrivateIpAddresses array = [for vm in vmInstances: vm.config.privateIPAddress]
-output maintenanceConfigurationName string = monthlyMaintenanceConfiguration.name
-output maintenanceConfigurationResourceId string = monthlyMaintenanceConfiguration.id
+output maintenanceConfigurationName string = monthlyMaintenanceConfiguration.outputs.name
+output maintenanceConfigurationResourceId string = monthlyMaintenanceConfiguration.outputs.resourceId
