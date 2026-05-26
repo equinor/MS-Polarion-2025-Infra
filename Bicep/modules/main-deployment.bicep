@@ -50,6 +50,12 @@ param windowsAdminCenterExtensionSettings object = {
   salt: ''
 }
 
+@description('Start date/time for the monthly maintenance window in YYYY-MM-DD hh:mm format.')
+param maintenanceWindowStartDateTime string = utcNow('yyyy-MM-dd HH:mm')
+
+@description('Windows time zone name used by the monthly maintenance window.')
+param maintenanceWindowTimeZone string = 'W. Europe Standard Time'
+
 @description('Secret name in S499-FkeyADJoin Key Vault containing the AD join account password.')
 param domainJoinPasswordSecretName string = 'domainJoinKey'
 
@@ -82,6 +88,34 @@ var vmPrivateIpAddresses = [for vm in vmInstances: vm.config.privateIPAddress]
 var recoveryServicesVaultResourceGroupName = '${resourceGroup().name}-RSV'
 var recoveryServicesVaultName = '${toLower(solution)}-rsv-${toLower(environment)}'
 
+resource monthlyMaintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfigurations@2023-10-01-preview' = {
+  name: 'Monthly-${resourceGroup().name}'
+  location: resourceGroup().location
+  properties: {
+    extensionProperties: {}
+    installPatches: {
+      rebootSetting: 'Never'
+      windowsParameters: {
+        classificationsToInclude: [
+          'Critical'
+          'Security'
+        ]
+      }
+    }
+    maintenanceScope: 'InGuestPatch'
+    maintenanceWindow: {
+      duration: '04:00'
+      expirationDateTime: '9999-12-31 23:59'
+      recurEvery: 'Month Second Sunday'
+      startDateTime: maintenanceWindowStartDateTime
+      timeZone: maintenanceWindowTimeZone
+    }
+    namespace: 'Microsoft.Maintenance'
+    visibility: 'Custom'
+  }
+  tags: tags
+}
+
 var vmInstances = [
   for i in range(0, effectiveVmCount): {
     index: i + 1
@@ -106,7 +140,7 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
     name: 'vm-${toLower(vm.name)}'
     params: {
       provisionVMAgent: true
-      maintenanceConfigurationResourceId: '/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourcegroups/s499-ms-polarion-2025-${toLower(environment)}/providers/microsoft.maintenance/maintenanceconfigurations/monthlypatch-s499-ms-polarion-2025-${toLower(environment)}'
+      maintenanceConfigurationResourceId: monthlyMaintenanceConfiguration.id
       patchMode: 'AutomaticByPlatform'
       patchAssessmentMode: 'AutomaticByPlatform'
       enableHotpatching: false
@@ -453,3 +487,5 @@ module domainJoinExtension 'domain-join-extension.bicep' = [
 output deployedVmNames array = [for vm in vmInstances: vm.name]
 output deployedVmIds array = [for (vm, i) in vmInstances: windowsVm[i].outputs.resourceId]
 output deployedVmPrivateIpAddresses array = [for vm in vmInstances: vm.config.privateIPAddress]
+output maintenanceConfigurationName string = monthlyMaintenanceConfiguration.name
+output maintenanceConfigurationResourceId string = monthlyMaintenanceConfiguration.id
