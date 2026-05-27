@@ -115,8 +115,6 @@ module monthlyMaintenanceConfiguration 'br/public:avm/res/maintenance/maintenanc
     visibility: 'Custom'
     tags: tags
   }
-    tags: tags
-  }
 }
 
 var vmInstances = [
@@ -143,7 +141,6 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
     name: 'vm-${toLower(vm.name)}'
     params: {
       provisionVMAgent: true
-      maintenanceConfigurationResourceId: monthlyMaintenanceConfiguration.outputs.resourceId
       maintenanceConfigurationResourceId: monthlyMaintenanceConfiguration.outputs.resourceId
       patchMode: 'AutomaticByPlatform'
       patchAssessmentMode: 'AutomaticByPlatform'
@@ -493,6 +490,3 @@ output deployedVmIds array = [for (vm, i) in vmInstances: windowsVm[i].outputs.r
 output deployedVmPrivateIpAddresses array = [for vm in vmInstances: vm.config.privateIPAddress]
 output maintenanceConfigurationName string = monthlyMaintenanceConfiguration.outputs.name
 output maintenanceConfigurationResourceId string = monthlyMaintenanceConfiguration.outputs.resourceId
-output maintenanceConfigurationName string = monthlyMaintenanceConfiguration.outputs.name
-output maintenanceConfigurationResourceId string = monthlyMaintenanceConfiguration.outputs.resourceId
-
