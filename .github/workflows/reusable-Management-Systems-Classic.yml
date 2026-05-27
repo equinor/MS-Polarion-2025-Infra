@@ -193,7 +193,7 @@ jobs:
               -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -solution "${{inputs.solution}}" `
               -KeyVaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" `
-              -environment "${{inputs.environmentName}}" -whatif
+              -environment "${{inputs.environmentName}}"  # -whatif
             Write-Output "Time end VM deployment: $(get-date)"
 
       - name: Deploy Step 4 - Harden Key Vault Network Access
