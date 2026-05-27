@@ -50,8 +50,8 @@ param windowsAdminCenterExtensionSettings object = {
   salt: ''
 }
 
-@description('Start date/time for the monthly maintenance window in YYYY-MM-DD hh:mm format.')
-param maintenanceWindowStartDateTime string = utcNow('yyyy-MM-dd HH:mm')
+@description('Start date/time for the monthly maintenance window in ISO 8601 format.')
+param maintenanceWindowStartDateTime string = utcNow('yyyy-MM-ddTHH:mm:00Z')
 
 @description('Windows time zone name used by the monthly maintenance window.')
 param maintenanceWindowTimeZone string = 'W. Europe Standard Time'
@@ -106,7 +106,7 @@ module monthlyMaintenanceConfiguration 'br/public:avm/res/maintenance/maintenanc
     maintenanceScope: 'InGuestPatch'
     maintenanceWindow: {
       duration: '04:00'
-      expirationDateTime: '9999-12-31 23:59'
+      expirationDateTime: '9999-12-31T23:59:00Z'
       recurEvery: 'Month Second Sunday'
       startDateTime: maintenanceWindowStartDateTime
       timeZone: maintenanceWindowTimeZone
