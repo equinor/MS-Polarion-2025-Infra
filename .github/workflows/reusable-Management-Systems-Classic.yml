@@ -108,7 +108,7 @@ jobs:
                 -location "${{inputs.location}}" `
                 -rgLocation "${{inputs.location}}" `
                 -solution "${{inputs.solution}}" `
-                -githubRepository (@{Repository = "https://github.com/equinor/news-scanner-infra"}) `
+                -githubRepository (@{Repository = "https://github.com/equinor/ms-polarion-2025-infra"}) `
                 -environment "${{inputs.environmentName}}" `
                 -runner $runner `
                 -includeRunnerAccess $true # -whatif
@@ -213,7 +213,7 @@ jobs:
                 -location "${{inputs.location}}" `
                 -rgLocation "${{inputs.location}}" `
                 -solution "${{inputs.solution}}" `
-                -githubRepository (@{Repository = "https://github.com/equinor/news-scanner-infra"}) `
+                -githubRepository (@{Repository = "https://github.com/equinor/ms-polarion-2025-infra"}) `
                 -environment "${{inputs.environmentName}}" `
                 -runner $runner `
                 -includeRunnerAccess $false # -whatif

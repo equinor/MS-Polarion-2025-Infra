@@ -127,25 +127,25 @@ output dependencyDeploymentOutput object = dependencyDeployment.outputs
 //   scope: resourceGroup(newRG.name)
 // }
 
-module mainDeployment './modules/main-deployment.bicep' = {
-  name: 'mainDeployment'
-  params: {
-    environment: environment
-    subnetConfig: subnetConfig
-    keyVaultName: dependencyDeployment.outputs.keyVaultName
-    vmAdminPasswordSecretNameSuffix: vmAdminPasswordSecretNameSuffix
-    vmNameBase: vmNameBase
-    solution: solution
-    sharedNetworkResourceGroupName: sharedNetworkResourceGroupName
-    sharedNetworkSecurityGroupName: sharedNetworkSecurityGroupName
-    subscriptionPrefix: subscriptionPrefix
-    maintenanceWindowStartDateTime: maintenanceWindowStartDateTime
-    tags: tags
-  }
-  scope: resourceGroup(newRG.name)
-}
+// module mainDeployment './modules/main-deployment.bicep' = {
+//   name: 'mainDeployment'
+//   params: {
+//     environment: environment
+//     subnetConfig: subnetConfig
+//     keyVaultName: dependencyDeployment.outputs.keyVaultName
+//     vmAdminPasswordSecretNameSuffix: vmAdminPasswordSecretNameSuffix
+//     vmNameBase: vmNameBase
+//     solution: solution
+//     sharedNetworkResourceGroupName: sharedNetworkResourceGroupName
+//     sharedNetworkSecurityGroupName: sharedNetworkSecurityGroupName
+//     subscriptionPrefix: subscriptionPrefix
+//     maintenanceWindowStartDateTime: maintenanceWindowStartDateTime
+//     tags: tags
+//   }
+//   scope: resourceGroup(newRG.name)
+// }
 
-output mainDeploymentOutput object = {
-  deployedVmNames: mainDeployment.outputs.deployedVmNames
-  deployedVmIds: mainDeployment.outputs.deployedVmIds
-}
+// output mainDeploymentOutput object = {
+//   deployedVmNames: mainDeployment.outputs.deployedVmNames
+//   deployedVmIds: mainDeployment.outputs.deployedVmIds
+// }
