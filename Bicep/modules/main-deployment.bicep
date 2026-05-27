@@ -88,11 +88,18 @@ var vmPrivateIpAddresses = [for vm in vmInstances: vm.config.privateIPAddress]
 var recoveryServicesVaultResourceGroupName = '${resourceGroup().name}-RSV'
 var recoveryServicesVaultName = '${toLower(solution)}-rsv-${toLower(environment)}'
 
+<<<<<<< HEAD
 module monthlyMaintenanceConfiguration 'br/public:avm/res/maintenance/maintenance-configuration:0.4.0' = {
   name: 'monthlyMaintenanceConfiguration'
   params: {
     name: 'Monthly-${resourceGroup().name}'
     location: resourceGroup().location
+=======
+resource monthlyMaintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfigurations@2023-10-01-preview' = {
+  name: 'Monthly-${resourceGroup().name}'
+  location: resourceGroup().location
+  properties: {
+>>>>>>> master
     extensionProperties: {}
     installPatches: {
       rebootSetting: 'Never'
@@ -113,8 +120,13 @@ module monthlyMaintenanceConfiguration 'br/public:avm/res/maintenance/maintenanc
     }
     namespace: 'Microsoft.Maintenance'
     visibility: 'Custom'
+<<<<<<< HEAD
     tags: tags
   }
+=======
+  }
+  tags: tags
+>>>>>>> master
 }
 
 var vmInstances = [
@@ -141,7 +153,11 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
     name: 'vm-${toLower(vm.name)}'
     params: {
       provisionVMAgent: true
+<<<<<<< HEAD
       maintenanceConfigurationResourceId: monthlyMaintenanceConfiguration.outputs.resourceId
+=======
+      maintenanceConfigurationResourceId: monthlyMaintenanceConfiguration.id
+>>>>>>> master
       patchMode: 'AutomaticByPlatform'
       patchAssessmentMode: 'AutomaticByPlatform'
       enableHotpatching: false
@@ -488,5 +504,10 @@ module domainJoinExtension 'domain-join-extension.bicep' = [
 output deployedVmNames array = [for vm in vmInstances: vm.name]
 output deployedVmIds array = [for (vm, i) in vmInstances: windowsVm[i].outputs.resourceId]
 output deployedVmPrivateIpAddresses array = [for vm in vmInstances: vm.config.privateIPAddress]
+<<<<<<< HEAD
 output maintenanceConfigurationName string = monthlyMaintenanceConfiguration.outputs.name
 output maintenanceConfigurationResourceId string = monthlyMaintenanceConfiguration.outputs.resourceId
+=======
+output maintenanceConfigurationName string = monthlyMaintenanceConfiguration.name
+output maintenanceConfigurationResourceId string = monthlyMaintenanceConfiguration.id
+>>>>>>> master

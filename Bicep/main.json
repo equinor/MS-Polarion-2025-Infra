@@ -5,7 +5,11 @@
     "_generator": {
       "name": "bicep",
       "version": "0.42.1.51946",
+<<<<<<< HEAD
       "templateHash": "13445205939065881730"
+=======
+      "templateHash": "2025975312948619044"
+>>>>>>> master
     }
   },
   "parameters": {
@@ -20577,7 +20581,11 @@
             "_generator": {
               "name": "bicep",
               "version": "0.42.1.51946",
+<<<<<<< HEAD
               "templateHash": "9847647601672441698"
+=======
+              "templateHash": "15290716889322920574"
+>>>>>>> master
             }
           },
           "parameters": {
@@ -20788,6 +20796,38 @@
           },
           "resources": [
             {
+<<<<<<< HEAD
+=======
+              "type": "Microsoft.Maintenance/maintenanceConfigurations",
+              "apiVersion": "2023-10-01-preview",
+              "name": "[format('Monthly-{0}', resourceGroup().name)]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "extensionProperties": {},
+                "installPatches": {
+                  "rebootSetting": "Never",
+                  "windowsParameters": {
+                    "classificationsToInclude": [
+                      "Critical",
+                      "Security"
+                    ]
+                  }
+                },
+                "maintenanceScope": "InGuestPatch",
+                "maintenanceWindow": {
+                  "duration": "04:00",
+                  "expirationDateTime": "9999-12-31 23:59",
+                  "recurEvery": "Month Second Sunday",
+                  "startDateTime": "[parameters('maintenanceWindowStartDateTime')]",
+                  "timeZone": "[parameters('maintenanceWindowTimeZone')]"
+                },
+                "namespace": "Microsoft.Maintenance",
+                "visibility": "Custom"
+              },
+              "tags": "[parameters('tags')]"
+            },
+            {
+>>>>>>> master
               "copy": {
                 "name": "windowsAdminCenterExtension",
                 "count": "[length(variables('vmInstances'))]"
@@ -20810,6 +20850,7 @@
               ]
             },
             {
+<<<<<<< HEAD
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2025-04-01",
               "name": "monthlyMaintenanceConfiguration",
@@ -21218,6 +21259,8 @@
               }
             },
             {
+=======
+>>>>>>> master
               "copy": {
                 "name": "windowsVm",
                 "count": "[length(variables('vmInstances'))]"
@@ -21235,7 +21278,11 @@
                     "value": true
                   },
                   "maintenanceConfigurationResourceId": {
+<<<<<<< HEAD
                     "value": "[reference(resourceId('Microsoft.Resources/deployments', 'monthlyMaintenanceConfiguration'), '2025-04-01').outputs.resourceId.value]"
+=======
+                    "value": "[resourceId('Microsoft.Maintenance/maintenanceConfigurations', format('Monthly-{0}', resourceGroup().name))]"
+>>>>>>> master
                   },
                   "patchMode": {
                     "value": "AutomaticByPlatform"
@@ -30306,7 +30353,11 @@
                 }
               },
               "dependsOn": [
+<<<<<<< HEAD
                 "[resourceId('Microsoft.Resources/deployments', 'monthlyMaintenanceConfiguration')]"
+=======
+                "[resourceId('Microsoft.Maintenance/maintenanceConfigurations', format('Monthly-{0}', resourceGroup().name))]"
+>>>>>>> master
               ]
             },
             {
@@ -31178,11 +31229,19 @@
             },
             "maintenanceConfigurationName": {
               "type": "string",
+<<<<<<< HEAD
               "value": "[reference(resourceId('Microsoft.Resources/deployments', 'monthlyMaintenanceConfiguration'), '2025-04-01').outputs.name.value]"
             },
             "maintenanceConfigurationResourceId": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.Resources/deployments', 'monthlyMaintenanceConfiguration'), '2025-04-01').outputs.resourceId.value]"
+=======
+              "value": "[format('Monthly-{0}', resourceGroup().name)]"
+            },
+            "maintenanceConfigurationResourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Maintenance/maintenanceConfigurations', format('Monthly-{0}', resourceGroup().name))]"
+>>>>>>> master
             }
           }
         }
