@@ -87,6 +87,7 @@ var effectiveVmCount = length(vmConfigurations) > 0 ? length(vmConfigurations) :
 var vmPrivateIpAddresses = [for vm in vmInstances: vm.config.privateIPAddress]
 var recoveryServicesVaultResourceGroupName = '${resourceGroup().name}-RSV'
 var recoveryServicesVaultName = '${toLower(solution)}-rsv-${toLower(environment)}'
+var workloadNetworkSecurityGroupName = 'ms-polarion-2025-nsg-${toLower(environment)}'
 
 module monthlyMaintenanceConfiguration 'br/public:avm/res/maintenance/maintenance-configuration:0.4.0' = {
   name: 'monthlyMaintenanceConfiguration'
@@ -184,6 +185,7 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
       nicConfigurations: [
         {
           nicSuffix: '-nic-01'
+          networkSecurityGroupResourceId: workloadNetworkSecurityGroup.outputs.resourceId
           ipConfigurations: [
             {
               name: 'ipconfig01'
@@ -404,7 +406,7 @@ module workloadNetworkSecurityGroup 'br/public:avm/res/network/network-security-
   name: '${solution}-nsg-${environment}'
   params: {
     location: resourceGroup().location
-    name: '${toLower(solution)}-nsg-${toLower(environment)}'
+    name: workloadNetworkSecurityGroupName
     tags: tags
     securityRules: nsgSecurityRules
   }
