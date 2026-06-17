@@ -306,7 +306,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           description: 'Allow inbound traffic from Azure Load Balancer'
           protocol: '*'
           sourcePortRange: '*'
-          destinationPortRange: '*'
+          destinationPortRange: '443'
           sourceAddressPrefix: 'AzureLoadBalancer'
           destinationAddressPrefix: 'VirtualNetwork'
           access: 'Allow'
@@ -367,21 +367,21 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefixes: []
         }
       }
-      // {
-      //   name: 'AllowAllPortsInternalInbound'
-      //   properties: {
-      //     protocol: '*'
-      //     sourcePortRange: '*'
-      //     destinationPortRange: '*'
-      //     sourceAddressPrefixes: vmPrivateIpAddresses
-      //     destinationAddressPrefixes: vmPrivateIpAddresses
-      //     access: 'Allow'
-      //     priority: 1010
-      //     direction: 'Inbound'
-      //     sourcePortRanges: []
-      //     destinationPortRanges: []
-      //   }
-      // }
+      {
+        name: 'AllowAllPortsInternalInbound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '443'
+          sourceAddressPrefixes: vmPrivateIpAddresses
+          destinationAddressPrefixes: vmPrivateIpAddresses
+          access: 'Allow'
+          priority: 1010
+          direction: 'Inbound'
+          sourcePortRanges: []
+          destinationPortRanges: []
+        }
+      }
       {
         name: 'AllowAllPortsInternalOutbound'
         properties: {
