@@ -306,7 +306,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           description: 'Allow inbound traffic from Azure Load Balancer'
           protocol: '*'
           sourcePortRange: '*'
-          destinationPortRange: '*'
+          destinationPortRange: '443'
           sourceAddressPrefix: 'AzureLoadBalancer'
           destinationAddressPrefix: 'VirtualNetwork'
           access: 'Allow'
