@@ -372,6 +372,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefixes: []
         }
       }
+      // This is a test to see if the rule will be removed from the NSG when redeployed.
       // {
       //   name: 'AllowAllPortsInternalInbound'
       //   properties: {
