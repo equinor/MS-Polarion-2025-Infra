@@ -253,7 +253,16 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           protocol: 'Tcp'
           sourcePortRange: '*'
           destinationPortRange: '3389'
-          sourceAddressPrefix: 'VirtualNetwork'
+          sourceAddressPrefix: [
+            '10.224.182.28'
+            '10.80.0.159'
+            '10.80.128.150'
+            '213.236.148.45'
+            '185.55.105.28'
+            '10.73.200.75'
+            '10.74.143.75'
+            '136.164.1.0/24'
+          ]
           destinationAddressPrefixes: vmPrivateIpAddresses
           access: 'Allow'
           priority: 1002
