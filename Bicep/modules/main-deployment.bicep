@@ -253,7 +253,7 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           protocol: 'Tcp'
           sourcePortRange: '*'
           destinationPortRange: '3389'
-          sourceAddressPrefix: [
+          sourceAddressPrefixes: [
             '10.224.182.28'
             '10.80.0.159'
             '10.80.128.150'
