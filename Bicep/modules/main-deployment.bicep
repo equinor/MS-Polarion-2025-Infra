@@ -373,30 +373,30 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
         }
       }
       // This is a test to see if the rule will be removed from the NSG when redeployed.
-      // {
-      //   name: 'AllowAllPortsInternalInbound'
-      //   properties: {
-      //     protocol: '*'
-      //     sourcePortRange: '*'
-      //     // destinationPortRange: '443'
-      //     sourceAddressPrefixes: vmPrivateIpAddresses
-      //     destinationAddressPrefixes: vmPrivateIpAddresses
-      //     access: 'Allow'
-      //     priority: 1010
-      //     direction: 'Inbound'
-      //     sourcePortRanges: []
-      //     destinationPortRanges: [
-      //       '443'
-      //       '2181'
-      //       '3690'
-      //       '5433'
-      //       '6516'
-      //       '8887'
-      //       '8889'
-      //       '40608'
-      //     ]
-      //   }
-      // }
+      {
+        name: 'AllowAllPortsInternalInbound'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          // destinationPortRange: '443'
+          sourceAddressPrefixes: vmPrivateIpAddresses
+          destinationAddressPrefixes: vmPrivateIpAddresses
+          access: 'Allow'
+          priority: 1010
+          direction: 'Inbound'
+          sourcePortRanges: []
+          destinationPortRanges: [
+            '443'
+            '2181'
+            '3690'
+            '5433'
+            '6516'
+            '8887'
+            '8889'
+            '40608'
+          ]
+        }
+      }
       {
         name: 'AllowAllPortsInternalOutbound'
         properties: {
