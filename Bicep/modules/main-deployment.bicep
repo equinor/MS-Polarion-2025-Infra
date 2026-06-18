@@ -227,8 +227,13 @@ var nsgBaseSecurityRules = [
       sourcePortRange: '*'
       destinationPortRanges: [
         '443'
-        '6516'
+        '2181'
+        '3690'
         '5433'
+        '6516'
+        '8887'
+        '8889'
+        '40608'
       ]
       sourceAddressPrefix: 'VirtualNetwork'
       destinationAddressPrefix: 'VirtualNetwork'
@@ -367,21 +372,30 @@ var nsgRdpSecurityRules = length(vmPrivateIpAddresses) > 0
           sourceAddressPrefixes: []
         }
       }
-      {
-        name: 'AllowAllPortsInternalInbound'
-        properties: {
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRange: '443'
-          sourceAddressPrefixes: vmPrivateIpAddresses
-          destinationAddressPrefixes: vmPrivateIpAddresses
-          access: 'Allow'
-          priority: 1010
-          direction: 'Inbound'
-          sourcePortRanges: []
-          destinationPortRanges: []
-        }
-      }
+      // {
+      //   name: 'AllowAllPortsInternalInbound'
+      //   properties: {
+      //     protocol: '*'
+      //     sourcePortRange: '*'
+      //     // destinationPortRange: '443'
+      //     sourceAddressPrefixes: vmPrivateIpAddresses
+      //     destinationAddressPrefixes: vmPrivateIpAddresses
+      //     access: 'Allow'
+      //     priority: 1010
+      //     direction: 'Inbound'
+      //     sourcePortRanges: []
+      //     destinationPortRanges: [
+      //       '443'
+      //       '2181'
+      //       '3690'
+      //       '5433'
+      //       '6516'
+      //       '8887'
+      //       '8889'
+      //       '40608'
+      //     ]
+      //   }
+      // }
       {
         name: 'AllowAllPortsInternalOutbound'
         properties: {
