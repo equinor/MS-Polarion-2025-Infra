@@ -226,6 +226,7 @@ var nsgBaseSecurityRules = [
       protocol: 'Tcp'
       sourcePortRange: '*'
       destinationPortRanges: [
+        '80'
         '443'
         '2181'
         '3690'
