@@ -99,7 +99,6 @@ jobs:
             $runner = (Invoke-RestMethod -Uri https://ipinfo.io/json).ip
             Write-Output "Runner: $runner"
 
-
             Write-Output "Time start deployment: $(get-date)"
             New-AzSubscriptionDeployment -Name "${{inputs.solution}}-ManualRun-$randomString" `
                 -TemplateFile ".\Bicep\main.bicep" `
@@ -124,7 +123,6 @@ jobs:
             # Check for external IP address
             $runner2 = (Invoke-RestMethod -Uri https://ipinfo.io/json).ip
             Write-Output "Runner: $runner2"
-
 
             $vms = 1..4
             # $sqlServers = 1..1
