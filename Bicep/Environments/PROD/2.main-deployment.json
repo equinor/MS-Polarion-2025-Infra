@@ -1,0 +1,101 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionPrefix": {
+            "value": "S499"
+        },
+        "environment": {
+            "value": "PROD"
+        },
+        "subnetConfig": {
+            "value": {
+                "compute": "/subscriptions/5a0bb1d0-a00b-40d4-9fc4-4f0e3fd71c4e/resourceGroups/S499-NOE-network/providers/Microsoft.Network/virtualNetworks/S499-NOE-vnet/subnets/S499-NOE-snet-compute-polarion-prod"
+            }
+        },
+        "keyVaultName": {
+            "value": "ms-polarion-2025-kv2-prod"
+        },
+        "vmAdminPasswordSecretNameSuffix": {
+            "value": "-localadmin-password"
+        },
+        "vmCount": {
+            "value": 2
+        },
+        "vmSize": {
+            "value": "Standard_D4s_v5"
+        },
+        "vmNameBase": {
+            "value": "S499POLWS"
+        },
+        "solution": {
+            "value": "MS-POLARION-2025"
+        },
+        "sharedNetworkResourceGroupName": {
+            "value": "S499-NOE-Network"
+        },
+        "sharedNetworkSecurityGroupName": {
+            "value": "S499-NOE-snet-compute-polarion-prod-nsg"
+        },
+        "enableWindowsAdminCenterExtension": {
+            "value": true
+        },
+        "windowsAdminCenterExtensionSettings": {
+            "value": {
+                "port": "6516",
+                "salt": ""
+            }
+        },
+        "vmConfigurations": {
+            "value": [
+                {
+                    "index": 1,
+                    "vmSize": "Standard_D4s_v5",
+                    "vmImageSku": "2025-datacenter-g2",
+                    "osDiskSizeGB": 128,
+                    "hasDataDisk": true,
+                    "dataDiskSizeGB": 256,
+                    "dataDiskStorageType": "Premium_LRS",
+                    "privateIPAddress": "10.83.157.180"
+                },
+                {
+                    "index": 2,
+                    "vmSize": "Standard_D4s_v5",
+                    "vmImageSku": "2025-datacenter-g2",
+                    "osDiskSizeGB": 128,
+                    "hasDataDisk": true,
+                    "dataDiskSizeGB": 256,
+                    "dataDiskStorageType": "Premium_LRS",
+                    "privateIPAddress": "10.83.157.181"
+                },
+                {
+                    "index": 3,
+                    "vmSize": "Standard_D4s_v5",
+                    "vmImageSku": "2025-datacenter-g2",
+                    "osDiskSizeGB": 128,
+                    "hasDataDisk": true,
+                    "dataDiskSizeGB": 512,
+                    "dataDiskStorageType": "Premium_LRS",
+                    "privateIPAddress": "10.83.157.182"
+                },
+                {
+                    "index": 4,
+                    "vmSize": "Standard_D4s_v5",
+                    "vmImageSku": "2025-datacenter-g2",
+                    "osDiskSizeGB": 128,
+                    "hasDataDisk": true,
+                    "dataDiskSizeGB": 256,
+                    "dataDiskStorageType": "Premium_LRS",
+                    "privateIPAddress": "10.83.157.183"
+                }
+            ]
+        },
+        "tags": {
+            "value": {
+                "Environment": "Production",
+                "Project": "Polarion2025",
+                "ManagedBy": "Infrastructure"
+            }
+        }
+    }
+}
