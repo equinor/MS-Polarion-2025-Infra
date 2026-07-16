@@ -14,7 +14,7 @@
             }
         },
         "keyVaultName": {
-            "value": "ms-polarion-2025-kv2-prod"
+            "value": "ms-polarion-2025-kv-prod"
         },
         "vmAdminPasswordSecretNameSuffix": {
             "value": "-localadmin-password"
