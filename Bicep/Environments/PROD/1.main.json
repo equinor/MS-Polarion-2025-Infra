@@ -9,7 +9,7 @@
             "value": "PROD"
         },
         "keyVaultName": {
-            "value": "MS-POLARION-2025-KV2"
+            "value": "MS-POLARION-2025-KV"
         },
         "enablePurgeProtection": {
             "value": false
