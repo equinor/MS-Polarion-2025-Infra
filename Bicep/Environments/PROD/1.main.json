@@ -29,7 +29,7 @@
                     "roleDefinitionIdOrName": "Key Vault Administrator"
                 },
                 {
-                    "principalId": "3904d88a-4310-413f-a35d-277ecdeb80e2",
+                    "principalId": "dbc8d4c7-9b26-4f87-8957-b4f7441a15f3",
                     "roleDefinitionIdOrName": "Key Vault Secrets User"
                 }
             ]
