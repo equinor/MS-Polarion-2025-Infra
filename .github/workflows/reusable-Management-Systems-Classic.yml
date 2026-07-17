@@ -129,7 +129,7 @@ jobs:
             # $passPhrase = 1..1
             $credentialsToCreate = @{}
 
-            $vaultName = if (${{inputs.environmentName}} -like "PROD") {"${{ inputs.solution }}-Kv-${{ inputs.environmentName }}"} else {"${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}"}
+            $vaultName = if ("${{inputs.environmentName}}" -like "PROD") {"${{ inputs.solution }}-Kv-${{ inputs.environmentName }}"} else {"${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}"}
 
             Foreach ($vm in $vms) {
               $existing = @()
@@ -186,7 +186,7 @@ jobs:
         with:
           azPSVersion: "latest"
           inlineScript: |
-            $vaultName = if (${{inputs.environmentName}} -like "*PROD*") {"${{ inputs.solution }}-Kv-${{ inputs.environmentName }}"} else {"${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}"}
+            $vaultName = if ("${{inputs.environmentName}}" -like "*PROD*") {"${{ inputs.solution }}-Kv-${{ inputs.environmentName }}"} else {"${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}"}
 
             Write-Output "Time start VM deployment: $(get-date)"
             New-AzResourceGroupDeployment -Name "Step-3-VMs-${{ github.actor }}-$(get-date -format 'yyyy.MM.dd')" `
