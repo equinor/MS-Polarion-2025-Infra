@@ -25,22 +25,22 @@ permissions: {}
   # id-token: write # Required to login to Azure using OIDC
 
 jobs:
-  deploy-polarion-dev:
-    name: Deploy Polarion - DEV - NorwayEast
-    uses: ./.github/workflows/reusable-Management-Systems-Classic.yml
-    secrets: inherit
-    permissions:
-      contents: read # Required to checkout the repository
-      id-token: write # Required to login to Azure using OIDC
-    with:
-      environmentName: "DEV"
-      resourceGroupName: "MS-Polarion-2025"
-      location: "NorwayEast"
-      environmentType: "NONPROD"
-      solution: "MS-Polarion-2025"
+  # deploy-polarion-dev:
+  #   name: Deploy Polarion - DEV - NorwayEast
+  #   uses: ./.github/workflows/reusable-Management-Systems-Classic.yml
+  #   secrets: inherit
+  #   permissions:
+  #     contents: read # Required to checkout the repository
+  #     id-token: write # Required to login to Azure using OIDC
+  #   with:
+  #     environmentName: "DEV"
+  #     resourceGroupName: "MS-Polarion-2025"
+  #     location: "NorwayEast"
+  #     environmentType: "NONPROD"
+  #     solution: "MS-Polarion-2025"
 
   deploy-polarion-qa:
-    needs: [deploy-polarion-dev]
+    # needs: [deploy-polarion-dev]
     name: Deploy Polarion - QA - NorwayEast
     uses: ./.github/workflows/reusable-Management-Systems-Classic.yml
     secrets: inherit
