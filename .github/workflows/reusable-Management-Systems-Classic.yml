@@ -129,9 +129,11 @@ jobs:
             # $passPhrase = 1..1
             $credentialsToCreate = @{}
 
+            $vaultName = if (${{inputs.environmentName}} -like "PROD") {"${{ inputs.solution }}-Kv-${{ inputs.environmentName }}"} else {"${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}"}
+
             Foreach ($vm in $vms) {
               $existing = @()
-              $existing = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}-localadmin-password"
+              $existing = get-azKeyVaultSecret -vaultName $vaultName -Name "${{ env.SubscriptionPrefix }}POLWS$('{0:d2}' -f $vm)${{ inputs.environmentName }}-localadmin-password"
 
               if ($null -like $existing) {
                 Write-Output "Secret does not exist, generating secret..." 
@@ -144,7 +146,7 @@ jobs:
 
             Foreach ($sqlserver in $sqlServers) {
               $sqexisting = @()
-              $sqexisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $sqlserver)${{ inputs.environmentName }}"
+              $sqexisting = get-azKeyVaultSecret -vaultName $vaultName -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $sqlserver)${{ inputs.environmentName }}"
 
               if ($null -like $sqexisting) {
                 Write-Output "Secret does not exist, generating secret..." 
@@ -157,7 +159,7 @@ jobs:
 
             Foreach ($p in $passPhrase) {
               $passExisting = @()
-              $passExisting = get-azKeyVaultSecret -vaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $p)${{ inputs.environmentName }}-passPhrase"
+              $passExisting = get-azKeyVaultSecret -vaultName $vaultName -Name "${{ env.SubscriptionPrefix }}POLSQ$('{0:d2}' -f $p)${{ inputs.environmentName }}-passPhrase"
 
               if ($null -like $passExisting) {
                 Write-Output "Secret does not exist, generating secret..." 
@@ -174,7 +176,7 @@ jobs:
               -TemplateFile .\Bicep\modules\keyvault-resources.bicep `
               -credentials $CredentialsToCreate `
               -environment "${{ inputs.environmentName }}" `
-              -keyVaultName '${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}' `
+              -keyVaultName $vaultName `
               -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -rgName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -rgLocation "${{ env.location }}" # -whatif
@@ -184,13 +186,15 @@ jobs:
         with:
           azPSVersion: "latest"
           inlineScript: |
+            $vaultName = if (${{inputs.environmentName}} -like "*PROD*") {"${{ inputs.solution }}-Kv-${{ inputs.environmentName }}"} else {"${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}"}
+
             Write-Output "Time start VM deployment: $(get-date)"
             New-AzResourceGroupDeployment -Name "Step-3-VMs-${{ github.actor }}-$(get-date -format 'yyyy.MM.dd')" `
               -TemplateFile ".\Bicep\modules\main-deployment.bicep" `
               -TemplateParameterFile ".\Bicep\Environments\${{inputs.environmentName}}\2.main-deployment.json" `
               -resourceGroupName "${{ env.SubscriptionPrefix }}-${{inputs.resourceGroupName}}-${{inputs.environmentName}}" `
               -solution "${{inputs.solution}}" `
-              -KeyVaultName "${{ inputs.solution }}-Kv2-${{ inputs.environmentName }}" `
+              -KeyVaultName $vaultName `
               -environment "${{inputs.environmentName}}"  # -whatif
             Write-Output "Time end VM deployment: $(get-date)"
 
