@@ -56,7 +56,8 @@
                     "hasDataDisk": true,
                     "dataDiskSizeGB": 256,
                     "dataDiskStorageType": "Premium_LRS",
-                    "privateIPAddress": "10.83.157.180"
+                    "privateIPAddress": "10.83.157.180",
+                    "osDiskPerformanceTier": "P10"
                 },
                 {
                     "index": 2,
@@ -66,7 +67,8 @@
                     "hasDataDisk": true,
                     "dataDiskSizeGB": 256,
                     "dataDiskStorageType": "Premium_LRS",
-                    "privateIPAddress": "10.83.157.181"
+                    "privateIPAddress": "10.83.157.181",
+                    "osDiskPerformanceTier": "P10"
                 },
                 {
                     "index": 3,
@@ -76,7 +78,8 @@
                     "hasDataDisk": true,
                     "dataDiskSizeGB": 512,
                     "dataDiskStorageType": "Premium_LRS",
-                    "privateIPAddress": "10.83.157.182"
+                    "privateIPAddress": "10.83.157.182",
+                    "osDiskPerformanceTier": "P10"
                 },
                 {
                     "index": 4,
@@ -86,7 +89,8 @@
                     "hasDataDisk": true,
                     "dataDiskSizeGB": 256,
                     "dataDiskStorageType": "Premium_LRS",
-                    "privateIPAddress": "10.83.157.183"
+                    "privateIPAddress": "10.83.157.183",
+                    "osDiskPerformanceTier": "P10"
                 }
             ]
         },
