@@ -32,7 +32,7 @@ param sharedNetworkResourceGroupName string
 @description('Shared NSG name that should receive VM-derived rules.')
 param sharedNetworkSecurityGroupName string
 
-@description('Per-VM configuration array. Each object should contain: vmSize, vmImageSku, osDiskSizeGB, hasDataDisk, dataDiskSizeGB, dataDiskStorageType, privateIPAddress.')
+@description('Per-VM configuration array. Each object should contain: vmSize, vmImageSku, osDiskSizeGB, hasDataDisk, dataDiskSizeGB, dataDiskStorageType, privateIPAddress, osDiskPerformanceTier (optional).')
 param vmConfigurations array = []
 
 @description('Resource tags applied to all VMs and child resources.')
@@ -133,6 +133,7 @@ var vmInstances = [
         dataDiskSizeGB: 256
         dataDiskStorageType: 'Premium_LRS'
         privateIPAddress: '10.83.157.${52 + i}'
+        osDiskPerformanceTier: ''
       },
       length(vmConfigurations) > i ? vmConfigurations[i] : {}
     )
@@ -140,7 +141,7 @@ var vmInstances = [
 ]
 
 module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
-  for vm in vmInstances: {
+  for (vm, vmIndex) in vmInstances: {
     name: 'vm-${toLower(vm.name)}'
     params: {
       provisionVMAgent: true
@@ -198,6 +199,23 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
       ]
       tags: tags
     }
+  }
+]
+
+// AVM virtual-machine module has no osDisk.tier param (OS disk is created inline, not as a standalone disk resource),
+// so a Premium SSD performance-tier override (e.g. 'P20') must be applied with a direct disk PATCH after the VM exists.
+resource osDiskPerformanceTierOverride 'Microsoft.Compute/disks@2024-03-02' = [
+  for (vm, vmIndex) in vmInstances: if (!empty(vm.config.?osDiskPerformanceTier ?? '')) {
+    name: '${vm.name}-disk-os-01'
+    location: resourceGroup().location
+    // creationData is immutable and omitted here on purpose; ARM preserves it since this disk already exists.
+    #disable-next-line BCP035
+    properties: {
+      tier: vm.config.osDiskPerformanceTier
+    }
+    dependsOn: [
+      windowsVm[vmIndex]
+    ]
   }
 ]
 
