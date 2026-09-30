@@ -203,14 +203,16 @@ module windowsVm 'br/public:avm/res/compute/virtual-machine:0.22.0' = [
 ]
 
 // AVM virtual-machine module has no osDisk.tier param (OS disk is created inline, not as a standalone disk resource),
-// so a Premium SSD performance-tier override (e.g. 'P20') must be applied with a direct disk PATCH after the VM exists.
+// so a Premium SSD performance-tier override (e.g. 'P20') must be applied with a direct disk update after the VM exists.
+// creationData is immutable and required by the resource schema, so it's read back from the already-provisioned disk
+// (whose resolved image version isn't literally 'latest') rather than reconstructed, to avoid a mismatch/replace attempt.
 resource osDiskPerformanceTierOverride 'Microsoft.Compute/disks@2024-03-02' = [
   for (vm, vmIndex) in vmInstances: if (!empty(vm.config.?osDiskPerformanceTier ?? '')) {
     name: '${vm.name}-disk-os-01'
     location: resourceGroup().location
-    // creationData is immutable and omitted here on purpose; ARM preserves it since this disk already exists.
-    #disable-next-line BCP035
     properties: {
+      #disable-next-line use-resource-symbol-reference
+      creationData: reference(resourceId('Microsoft.Compute/disks', '${vm.name}-disk-os-01'), '2024-03-02').creationData
       tier: vm.config.osDiskPerformanceTier
     }
     dependsOn: [
