@@ -40,7 +40,7 @@ jobs:
       solution: "MS-Polarion-2025"
 
   deploy-polarion-qa:
-    # needs: [deploy-polarion-dev]
+    needs: [deploy-polarion-dev]
     name: Deploy Polarion - QA - NorwayEast
     uses: ./.github/workflows/reusable-Management-Systems-Classic.yml
     secrets: inherit
