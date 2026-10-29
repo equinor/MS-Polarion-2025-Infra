@@ -133,6 +133,97 @@ module logAnalyticsWorkspace 'br/public:avm/res/operational-insights/workspace:0
 output logAnalyticsWorkspaceName string = logAnalyticsWorkspace.outputs.name
 output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.outputs.resourceId
 
+module dataCollectionEndpoint 'br/public:avm/res/insights/data-collection-endpoint:0.5.1' = {
+  name: '${solution}-dce-${environment}'
+  params: {
+    location: rgLocation
+    name: '${toLower(solution)}-dce-${toLower(environment)}'
+    kind: 'Windows'
+    tags: union(deploymentTags, tags)
+    publicNetworkAccess: publicNetworkAccessLogAnalytics
+    enableTelemetry: true
+  }
+  scope: resourceGroup(newRG.name)
+}
+
+output dataCollectionEndpointName string = dataCollectionEndpoint.outputs.name
+output dataCollectionEndpointId string = dataCollectionEndpoint.outputs.resourceId
+
+var dataCollectionRules = [
+  {
+    name: 'VMInformation-${environment}'
+    counterSpecifiers: [
+      '\\Processor Information(_Total)\\% Processor Time'
+      '\\Processor Information(_Total)\\% Privileged Time'
+      '\\Processor Information(_Total)\\% User Time'
+      '\\Processor Information(_Total)\\Processor Frequency'
+      '\\System\\Processes'
+      '\\Process(_Total)\\Thread Count'
+      '\\Process(_Total)\\Handle Count'
+      '\\System\\Processor Queue Length'
+      '\\Process(_Total)\\Working Set'
+      '\\Process(_Total)\\Working Set - Private'
+      '\\LogicalDisk(_Total)\\% Free Space'
+      '\\LogicalDisk(_Total)\\Free Megabytes'
+      '\\LogicalDisk(*)\\Free Megabytes'
+      '\\LogicalDisk(*)\\% Free Space'
+      '\\Storage Spaces Virtual Disk(*)\\Virtual Disk Total'
+      '\\LogicalDisk(*)\\Size'
+    ]
+    streams: [
+      'Microsoft-Perf'
+    ]
+    samplingFrequency: 60
+    kind: 'Windows'
+  }
+]
+
+module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.11.0' = [
+  for rule in dataCollectionRules: {
+    name: rule.name
+    params: {
+      location: rgLocation
+      name: rule.name
+      tags: union(deploymentTags, tags)
+      dataCollectionRuleProperties: {
+        kind: rule.kind
+        dataCollectionEndpointResourceId: dataCollectionEndpoint.outputs.resourceId
+        dataSources: {
+          performanceCounters: [
+            {
+              name: 'performanceCounters'
+              counterSpecifiers: rule.counterSpecifiers
+              streams: rule.streams
+              samplingFrequencyInSeconds: rule.samplingFrequency
+            }
+          ]
+        }
+        destinations: {
+          logAnalytics: [
+            {
+              name: 'logAnalytics'
+              workspaceResourceId: logAnalyticsWorkspace.outputs.resourceId
+            }
+          ]
+        }
+        dataFlows: [
+          {
+            streams: rule.streams
+            destinations: [
+              'logAnalytics'
+            ]
+          }
+        ]
+      }
+    }
+    scope: resourceGroup(newRG.name)
+  }
+]
+
+output dataCollectionRuleIds array = [
+  for (rule, index) in dataCollectionRules: dataCollectionRule[index].outputs.resourceId
+]
+
 module storageAccount 'br/public:avm/res/storage/storage-account:0.32.0' = {
   name: 'st${solution}${environment}'
   params: {
