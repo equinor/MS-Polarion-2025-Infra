@@ -520,7 +520,7 @@ resource windowsAdminCenterExtension 'Microsoft.Compute/virtualMachines/extensio
     properties: {
       publisher: 'Microsoft.AdminCenter'
       type: 'AdminCenter'
-      typeHandlerVersion: '0.0'
+      typeHandlerVersion: '1.0'
       autoUpgradeMinorVersion: true
       enableAutomaticUpgrade: true
       settings: windowsAdminCenterExtensionSettings
