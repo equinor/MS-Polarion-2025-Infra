@@ -177,7 +177,7 @@ var dataCollectionRules = [
     kind: 'Windows'
   }
   {
-    name: 'VMInsightsCounters-Aris-${environment}'
+    name: 'VMInsightsCounters-Polarion-${environment}'
     counterSpecifiers: [
       '\\VmInsights\\DetailedMetrics'
     ]
