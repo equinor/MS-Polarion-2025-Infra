@@ -176,6 +176,17 @@ var dataCollectionRules = [
     samplingFrequency: 60
     kind: 'Windows'
   }
+  {
+    name: 'VMInsightsCounters-Aris-${environment}'
+    counterSpecifiers: [
+      '\\VmInsights\\DetailedMetrics'
+    ]
+    streams: [
+      'Microsoft-InsightsMetrics'
+    ]
+    samplingFrequency: 60
+    kind: 'Windows'
+  }
 ]
 
 module dataCollectionRule 'br/public:avm/res/insights/data-collection-rule:0.11.0' = [
