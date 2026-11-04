@@ -546,6 +546,46 @@ module domainJoinExtension 'domain-join-extension.bicep' = [
   }
 ]
 
+resource virtualMachines 'Microsoft.Compute/virtualMachines@2023-09-01' existing = [
+  for vm in vmInstances: {
+    name: vm.name
+  }
+]
+
+resource vmInformationDataCollectionRule 'Microsoft.Insights/dataCollectionRules@2022-06-01' existing = {
+  name: 'VMInformation-${environment}'
+}
+
+resource vmInsightsDataCollectionRule 'Microsoft.Insights/dataCollectionRules@2022-06-01' existing = {
+  name: 'VMInsightsCounters-Polarion-${environment}'
+}
+
+resource vmInformationDataCollectionRuleAssociation 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = [
+  for (vm, vmIndex) in vmInstances: {
+    name: 'VMInformation-${environment}'
+    scope: virtualMachines[vmIndex]
+    properties: {
+      dataCollectionRuleId: vmInformationDataCollectionRule.id
+    }
+    dependsOn: [
+      windowsVm[vmIndex]
+    ]
+  }
+]
+
+resource vmInsightsDataCollectionRuleAssociation 'Microsoft.Insights/dataCollectionRuleAssociations@2022-06-01' = [
+  for (vm, vmIndex) in vmInstances: {
+    name: 'VMInsightsCounters-${environment}'
+    scope: virtualMachines[vmIndex]
+    properties: {
+      dataCollectionRuleId: vmInsightsDataCollectionRule.id
+    }
+    dependsOn: [
+      windowsVm[vmIndex]
+    ]
+  }
+]
+
 output deployedVmNames array = [for vm in vmInstances: vm.name]
 output deployedVmIds array = [for (vm, i) in vmInstances: windowsVm[i].outputs.resourceId]
 output deployedVmPrivateIpAddresses array = [for vm in vmInstances: vm.config.privateIPAddress]
